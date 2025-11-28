@@ -1,6 +1,8 @@
 from django.shortcuts import render, get_object_or_404
 from django.http import JsonResponse
 from django.contrib.auth.decorators import login_required
+from django.contrib import messages
+from django.shortcuts import redirect
 from .models import Course, Lesson, Assignment, Submission, Grade, Comment
 
 def home(request):
@@ -22,9 +24,22 @@ def courses_list(request):
 
 @login_required
 def lessons_list(request):
-    lessons = Lesson.objects.select_related('course').all()
+    course_id = request.GET.get('course')
+    
+    if course_id:
+        lessons = Lesson.objects.select_related('course').filter(course_id=course_id)
+        course = get_object_or_404(Course, id=course_id)
+    else:
+        lessons = Lesson.objects.select_related('course').all()
+        course = None
+    
+    # Получаем все курсы для фильтра
+    courses = Course.objects.all()
+    
     context = {
-        'lessons': lessons
+        'lessons': lessons,
+        'selected_course': course,
+        'courses': courses
     }
     return render(request, 'lessons/lessons_list.html', context)
 
@@ -64,3 +79,38 @@ def assignment_detail(request, assignment_id):
         'user_submission': user_submission
     }
     return render(request, 'assignments/assignment_detail.html', context)
+
+@login_required
+def submit_assignment(request, assignment_id):
+    assignment = get_object_or_404(Assignment, id=assignment_id)
+    
+    if request.method == 'POST':
+        # Проверяем, не сдавал ли уже пользователь это задание
+        existing_submission = Submission.objects.filter(
+            assignment=assignment, 
+            student=request.user
+        ).first()
+        
+        if existing_submission:
+            messages.error(request, 'Вы уже сдали эту работу!')
+            return redirect('assignment_detail', assignment_id=assignment_id)
+        
+        # Создаем новую сдачу
+        file = request.FILES.get('file')
+        text = request.POST.get('text', '')
+        
+        if not file:
+            messages.error(request, 'Пожалуйста, загрузите файл с работой')
+            return redirect('assignment_detail', assignment_id=assignment_id)
+        
+        submission = Submission.objects.create(
+            assignment=assignment,
+            student=request.user,
+            file=file,
+            text=text
+        )
+        
+        messages.success(request, 'Работа успешно сдана на проверку!')
+        return redirect('assignment_detail', assignment_id=assignment_id)
+    
+    return redirect('assignment_detail', assignment_id=assignment_id)

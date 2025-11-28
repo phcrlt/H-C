@@ -1,0 +1,155 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-8">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="/">Главная</a></li>
+                <li class="breadcrumb-item"><a href="/assignments/">Задания</a></li>
+                <li class="breadcrumb-item active">{{ assignment.title }}</li>
+            </ol>
+        </nav>
+
+        <div class="card mb-4">
+            <div class="card-header bg-warning text-dark">
+                <h2 class="mb-0"><i class="fas fa-tasks me-2"></i>{{ assignment.title }}</h2>
+            </div>
+            <div class="card-body">
+                <div class="assignment-meta mb-4">
+                    <span class="badge bg-primary me-2">
+                        <i class="fas fa-star me-1"></i>Макс. балл: {{ assignment.max_score }}
+                    </span>
+                    {% if assignment.deadline %}
+                    <span class="badge bg-{% if assignment.deadline_passed %}danger{% else %}success{% endif %} me-2">
+                        <i class="fas fa-clock me-1"></i>
+                        Дедлайн: {{ assignment.deadline|date:"d.m.Y H:i" }}
+                    </span>
+                    {% endif %}
+                    <span class="badge bg-info">
+                        <i class="fas fa-book me-1"></i>
+                        Урок: {{ assignment.lesson.title }}
+                    </span>
+                </div>
+
+                <div class="assignment-description mb-4">
+                    <h4>Описание задания:</h4>
+                    <div class="description-box p-3 bg-light rounded">
+                        {{ assignment.description|linebreaks }}
+                    </div>
+                </div>
+
+                <!-- Форма сдачи работы -->
+                <div class="submission-form">
+                    <h4><i class="fas fa-paper-plane me-2"></i>Сдача работы</h4>
+                    
+                    {% if user_submission %}
+                    <div class="alert alert-success">
+                        <h5><i class="fas fa-check-circle me-2"></i>Работа сдана</h5>
+                        <p class="mb-1">Дата сдачи: {{ user_submission.submitted_at|date:"d.m.Y H:i" }}</p>
+                        {% if user_submission.text %}
+                        <p class="mb-1">Ваш комментарий: {{ user_submission.text }}</p>
+                        {% endif %}
+                        {% if user_submission.file %}
+                        <p class="mb-0">
+                            <i class="fas fa-file me-1"></i>
+                            <a href="{{ user_submission.file.url }}" target="_blank">Скачать работу</a>
+                        </p>
+                        {% endif %}
+                    </div>
+
+                    {% if user_submission.grade %}
+                    <div class="alert alert-info">
+                        <h5><i class="fas fa-star me-2"></i>Оценка</h5>
+                        <p class="mb-1">Баллы: <strong>{{ user_submission.grade.score }}/{{ assignment.max_score }}</strong></p>
+                        {% if user_submission.grade.feedback %}
+                        <p class="mb-0">Комментарий преподавателя: {{ user_submission.grade.feedback }}</p>
+                        {% endif %}
+                    </div>
+                    {% else %}
+                    <div class="alert alert-warning">
+                        <i class="fas fa-clock me-2"></i>Работа на проверке
+                    </div>
+                    {% endif %}
+
+                    {% else %}
+                    <form method="post" action="{% url 'submit_assignment' assignment.id %}" enctype="multipart/form-data" class="needs-validation" novalidate>
+                        {% csrf_token %}
+                        <div class="mb-3">
+                            <label for="text" class="form-label">Комментарий к работе (необязательно):</label>
+                            <textarea class="form-control" id="text" name="text" rows="3" 
+                                      placeholder="Опишите ваше решение или задайте вопросы преподавателю..."></textarea>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="file" class="form-label">Загрузите файл с работой:</label>
+                            <input type="file" class="form-control" id="file" name="file" required>
+                            <div class="form-text">Поддерживаемые форматы: PDF, DOC, DOCX, ZIP, RAR (макс. 100 МБ)</div>
+                        </div>
+                        
+                        <button type="submit" class="btn btn-success btn-lg">
+                            <i class="fas fa-paper-plane me-2"></i>Сдать работу
+                        </button>
+                    </form>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="fas fa-info-circle me-2"></i>Информация</h5>
+            </div>
+            <div class="card-body">
+                <div class="mb-3">
+                    <h6>Курс:</h6>
+                    <p class="mb-0">{{ assignment.lesson.course.title }}</p>
+                </div>
+                
+                <div class="mb-3">
+                    <h6>Урок:</h6>
+                    <p class="mb-0">{{ assignment.lesson.title }}</p>
+                </div>
+                
+                <div class="mb-3">
+                    <h6>Сложность:</h6>
+                    <span class="badge bg-secondary">{{ assignment.lesson.course.get_level_display }}</span>
+                </div>
+
+                <div class="d-grid gap-2 mt-3">
+                    <a href="{% url 'lesson_detail' assignment.lesson.id %}" class="btn btn-outline-primary btn-sm">
+                        <i class="fas fa-book me-1"></i>К уроку
+                    </a>
+                    <a href="/assignments/" class="btn btn-outline-secondary btn-sm">
+                        <i class="fas fa-arrow-left me-1"></i>Все задания
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        {% if user_submission and user_submission.comments.exists %}
+        <div class="card mt-4">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="fas fa-comments me-2"></i>Комментарии</h5>
+            </div>
+            <div class="card-body">
+                {% for comment in user_submission.comments.all %}
+                <div class="comment mb-3 pb-3 border-bottom">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <strong>{{ comment.author.username }}</strong>
+                        <small class="text-muted">{{ comment.created_at|date:"d.m.Y H:i" }}</small>
+                    </div>
+                    <p class="mb-1 mt-2">{{ comment.text }}</p>
+                    {% if comment.is_teacher_comment %}
+                    <span class="badge bg-success">Преподаватель</span>
+                    {% endif %}
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

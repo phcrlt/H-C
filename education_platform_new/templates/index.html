@@ -57,9 +57,32 @@
                 <a href="/courses/" class="btn btn-sm btn-outline-primary">Все курсы</a>
             </div>
             <div class="card-body">
-                <div class="alert alert-info text-center">
-                    <h5>Курсы скоро появятся!</h5>
-                    <p class="mb-0">Мы работаем над добавлением интересных образовательных материалов</p>
+                <div class="row">
+                    {% for course in courses %}
+                    <div class="col-md-4 mb-4">
+                        <div class="card h-100">
+                            <div class="card-body">
+                                <h6>{{ course.title }}</h6>
+                                <small class="text-muted">{{ course.short_description }}</small>
+                                <div class="mt-2">
+                                    <span class="badge bg-{% if course.is_free %}success{% else %}warning{% endif %}">
+                                        {% if course.is_free %}Бесплатно{% else %}Премиум{% endif %}
+                                    </span>
+                                </div>
+                                <!-- ДОБАВЛЕНА КНОПКА УРОКОВ -->
+                                <div class="mt-3">
+                                    <a href="/lessons/?course={{ course.id }}" class="btn btn-outline-primary btn-sm w-100">
+                                        <i class="fas fa-book-open me-1"></i>Смотреть уроки
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% empty %}
+                    <div class="col-12 text-center">
+                        <p class="text-muted">Курсы скоро будут добавлены</p>
+                    </div>
+                    {% endfor %}
                 </div>
             </div>
         </div>

@@ -1,0 +1,90 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-8">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="/">Главная</a></li>
+                <li class="breadcrumb-item"><a href="/courses/">Курсы</a></li>
+                <li class="breadcrumb-item"><a href="/lessons/">Уроки</a></li>
+                <li class="breadcrumb-item active">{{ lesson.title }}</li>
+            </ol>
+        </nav>
+
+        <div class="card mb-4">
+            <div class="card-header bg-primary text-white">
+                <h2 class="mb-0"><i class="fas fa-book-open me-2"></i>{{ lesson.title }}</h2>
+            </div>
+            <div class="card-body">
+                <div class="lesson-meta mb-4">
+                    <span class="badge bg-secondary me-2">
+                        <i class="fas fa-clock me-1"></i>{{ lesson.duration }} минут
+                    </span>
+                    <span class="badge bg-info me-2">
+                        <i class="fas fa-list-ol me-1"></i>Порядок: {{ lesson.order }}
+                    </span>
+                    <span class="badge bg-{% if lesson.course.is_free %}success{% else %}warning{% endif %}">
+                        <i class="fas fa-graduation-cap me-1"></i>
+                        {{ lesson.course.title }}
+                    </span>
+                </div>
+
+                <div class="lesson-content">
+                    <h4>Содержание урока:</h4>
+                    <div class="content-box p-3 bg-light rounded">
+                        {{ lesson.content|linebreaks }}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="fas fa-tasks me-2"></i>Задания урока</h5>
+            </div>
+            <div class="card-body">
+                {% if assignments %}
+                    <div class="list-group">
+                        {% for assignment in assignments %}
+                        <a href="{% url 'assignment_detail' assignment.id %}" 
+                           class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
+                            <div>
+                                <h6 class="mb-1">{{ assignment.title }}</h6>
+                                <small class="text-muted">{{ assignment.description|truncatewords:10 }}</small>
+                            </div>
+                            <span class="badge bg-primary rounded-pill">{{ assignment.max_score }}</span>
+                        </a>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <div class="text-center text-muted">
+                        <i class="fas fa-inbox fa-2x mb-2"></i>
+                        <p>Задания пока не добавлены</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="card mt-4">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="fas fa-info-circle me-2"></i>Информация о курсе</h5>
+            </div>
+            <div class="card-body">
+                <h6>{{ lesson.course.title }}</h6>
+                <p class="small">{{ lesson.course.short_description }}</p>
+                <div class="d-grid gap-2">
+                    <a href="/courses/" class="btn btn-outline-primary btn-sm">
+                        <i class="fas fa-arrow-left me-1"></i>Все курсы
+                    </a>
+                    <a href="/lessons/" class="btn btn-outline-secondary btn-sm">
+                        <i class="fas fa-book me-1"></i>Все уроки
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
