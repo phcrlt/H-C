@@ -1,0 +1,37 @@
+<div class="row mt-5">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h4 class="mb-0">Популярные курсы</h4>
+                <a href="/courses/" class="btn btn-sm btn-outline-primary">Все курсы</a>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    {% for course in courses %}
+                    <div class="col-md-4 mb-4">
+                        <div class="card h-100 course-card">
+                            <div class="card-body">
+                                <h5 class="card-title">{{ course.title }}</h5>
+                                <p class="card-text">{{ course.short_description }}</p>
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <span class="badge bg-{% if course.is_free %}success{% else %}warning{% endif %}">
+                                        {% if course.is_free %}Бесплатно{% else %}{{ course.price }} руб.{% endif %}
+                                    </span>
+                                    <small class="text-muted">{{ course.duration }}</small>
+                                </div>
+                                <div class="mt-2">
+                                    <span class="badge bg-secondary">{{ course.get_level_display }}</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% empty %}
+                    <div class="col-12 text-center">
+                        <p class="text-muted">Курсы скоро будут добавлены</p>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

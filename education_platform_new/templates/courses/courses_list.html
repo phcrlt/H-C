@@ -1,0 +1,49 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1><i class="fas fa-book me-2"></i>Все курсы</h1>
+    <div class="btn-group">
+        <button class="btn btn-outline-primary active">Все</button>
+        <button class="btn btn-outline-primary">Бесплатные</button>
+        <button class="btn btn-outline-primary">Премиум</button>
+    </div>
+</div>
+
+<div class="row">
+    {% for course in courses %}
+    <div class="col-md-6 col-lg-4 mb-4">
+        <div class="card h-100 course-card">
+            <div class="card-header bg-{% if course.is_free %}success{% else %}warning{% endif %} text-white">
+                <h5 class="card-title mb-0">{{ course.title }}</h5>
+            </div>
+            <div class="card-body d-flex flex-column">
+                <p class="card-text flex-grow-1">{{ course.description|truncatewords:20 }}</p>
+                <div class="mt-auto">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <span class="badge bg-{% if course.is_free %}success{% else %}warning{% endif %}">
+                            {% if course.is_free %}Бесплатно{% else %}{{ course.price }} руб.{% endif %}
+                        </span>
+                        <small class="text-muted">{{ course.duration }}</small>
+                    </div>
+                    <div class="mb-2">
+                        <span class="badge bg-secondary">{{ course.get_level_display }}</span>
+                    </div>
+                    <button class="btn btn-primary w-100">
+                        <i class="fas fa-play me-1"></i>Начать курс
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% empty %}
+    <div class="col-12">
+        <div class="alert alert-info text-center">
+            <h4>Курсы пока не добавлены</h4>
+            <p>Скоро здесь появятся интересные образовательные материалы!</p>
+            <a href="/admin/core/course/add/" class="btn btn-primary">Добавить курс через админку</a>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% endblock %}

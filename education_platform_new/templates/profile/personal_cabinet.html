@@ -1,0 +1,176 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-4 mb-4">
+        <div class="card">
+            <div class="card-body text-center">
+                {% if user.userprofile.avatar %}
+                    <img src="{{ user.userprofile.avatar.url }}" alt="Аватар" class="rounded-circle mb-3" width="100" height="100">
+                {% else %}
+                    <div class="rounded-circle bg-primary d-inline-flex align-items-center justify-content-center mb-3" 
+                         style="width: 100px; height: 100px;">
+                        <i class="fas fa-user fa-2x text-white"></i>
+                    </div>
+                {% endif %}
+                <h4>{{ user.username }}</h4>
+                <p class="text-muted">{{ user.email }}</p>
+                <p class="text-muted">Зарегистрирован: {{ user.date_joined|date:"d.m.Y" }}</p>
+                <div class="mt-3">
+                    <span class="badge bg-success">Активный студент</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="card mt-4">
+            <div class="card-header">
+                <h6 class="mb-0">Быстрый доступ</h6>
+            </div>
+            <div class="card-body">
+                <div class="d-grid gap-2">
+                    <a href="#" class="btn btn-outline-primary btn-sm">
+                        <i class="fas fa-book me-1"></i>Мои курсы
+                    </a>
+                    <a href="#" class="btn btn-outline-success btn-sm">
+                        <i class="fas fa-chart-line me-1"></i>Прогресс
+                    </a>
+                    <a href="#editProfile" class="btn btn-outline-info btn-sm" data-bs-toggle="collapse">
+                        <i class="fas fa-edit me-1"></i>Редактировать профиль
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-8">
+        <!-- Форма редактирования профиля -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="fas fa-user-edit me-2"></i>Редактирование профиля</h5>
+            </div>
+            <div class="card-body">
+                <form method="post" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6>Основная информация:</h6>
+                            <div class="mb-3">
+                                <label class="form-label">Имя</label>
+                                {{ user_form.first_name }}
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Фамилия</label>
+                                {{ user_form.last_name }}
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Email</label>
+                                {{ user_form.email }}
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <h6>Дополнительная информация:</h6>
+                            <div class="mb-3">
+                                <label class="form-label">Телефон</label>
+                                {{ profile_form.phone }}
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Дата рождения</label>
+                                {{ profile_form.birth_date }}
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Аватар</label>
+                                {{ profile_form.avatar }}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">О себе</label>
+                        {{ profile_form.bio }}
+                    </div>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save me-2"></i>Сохранить изменения
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Статистика -->
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="fas fa-chart-bar me-2"></i>Статистика обучения</h5>
+            </div>
+            <div class="card-body">
+                <div class="row text-center">
+                    <div class="col-md-3 mb-3">
+                        <div class="card bg-primary text-white">
+                            <div class="card-body">
+                                <h3>0</h3>
+                                <p class="mb-0">Курсов</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <div class="card bg-success text-white">
+                            <div class="card-body">
+                                <h3>0</h3>
+                                <p class="mb-0">Уроков</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <div class="card bg-info text-white">
+                            <div class="card-body">
+                                <h3>0ч</h3>
+                                <p class="mb-0">Времени</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <div class="card bg-warning text-white">
+                            <div class="card-body">
+                                <h3>0%</h3>
+                                <p class="mb-0">Прогресс</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Рекомендуемые курсы -->
+        <div class="card mt-4">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="fas fa-graduation-cap me-2"></i>Рекомендуемые курсы</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <div class="card h-100">
+                            <div class="card-body">
+                                <h6>Python для начинающих</h6>
+                                <p class="text-muted small">Основы программирования на Python</p>
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <span class="badge bg-primary">Бесплатно</span>
+                                    <button class="btn btn-sm btn-outline-primary">Начать</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <div class="card h-100">
+                            <div class="card-body">
+                                <h6>Веб-разработка</h6>
+                                <p class="text-muted small">HTML, CSS, JavaScript основы</p>
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <span class="badge bg-success">Премиум</span>
+                                    <button class="btn btn-sm btn-outline-success">Подробнее</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
