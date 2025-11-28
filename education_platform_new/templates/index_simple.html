@@ -1,0 +1,108 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h1>Добро пожаловать на образовательную платформу!</h1>
+<p>Сервер работает успешно.</p>
+
+<div class="mt-4">
+    <h3>Доступные страницы:</h3>
+    <div class="list-group">
+        <a href="/" class="list-group-item list-group-item-action">Главная (красивая)</a>
+        <a href="/simple/" class="list-group-item list-group-item-action active">Главная (простая)</a>
+        <a href="/courses/" class="list-group-item list-group-item-action">Все курсы</a>
+        <a href="/accounts/login/" class="list-group-item list-group-item-action">Вход</a>
+        <a href="/accounts/register/" class="list-group-item list-group-item-action">Регистрация</a>
+        <a href="/accounts/profile/" class="list-group-item list-group-item-action">Личный кабинет</a>
+        <a href="/admin/" class="list-group-item list-group-item-action">Админка</a>
+    </div>
+</div>
+
+<div class="mt-4">
+    <div class="alert alert-info">
+        <h5>Статус системы:</h5>
+        <ul class="mb-0">
+            <li>✅ Сервер работает</li>
+            <li>✅ База данных подключена</li>
+            <li>✅ Пользовательская система активна</li>
+            <li>{% if user.is_authenticated %}✅ Вы авторизованы как {{ user.username }}{% else %}❌ Вы не авторизованы{% endif %}</li>
+        </ul>
+    </div>
+</div>
+
+<div class="row mt-4">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">Быстрые действия</h5>
+            </div>
+            <div class="card-body">
+                <div class="d-grid gap-2">
+                    {% if user.is_authenticated %}
+                        <a href="/accounts/profile/" class="btn btn-primary">Личный кабинет</a>
+                        <a href="/" class="btn btn-outline-primary">Красивая главная</a>
+                        <a href="/courses/" class="btn btn-outline-success">Смотреть курсы</a>
+                    {% else %}
+                        <a href="/accounts/register/" class="btn btn-success">Зарегистрироваться</a>
+                        <a href="/accounts/login/" class="btn btn-outline-primary">Войти в систему</a>
+                        <a href="/" class="btn btn-outline-info">Красивая главная</a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">Информация о платформе</h5>
+            </div>
+            <div class="card-body">
+                <p><strong>Образовательная платформа</strong> - это современная система для дистанционного обучения с интуитивно понятным интерфейсом.</p>
+                <p>Возможности платформы:</p>
+                <ul>
+                    <li>Система курсов и уроков</li>
+                    <li>Личный кабинет студента</li>
+                    <li>Отслеживание прогресса</li>
+                    <li>Адаптивный дизайн</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="mt-4">
+    <div class="card">
+        <div class="card-header">
+            <h5 class="mb-0">Техническая информация</h5>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-4">
+                    <strong>Backend:</strong>
+                    <ul>
+                        <li>Django 5.2.8</li>
+                        <li>Python 3.13</li>
+                        <li>SQLite база данных</li>
+                    </ul>
+                </div>
+                <div class="col-md-4">
+                    <strong>Frontend:</strong>
+                    <ul>
+                        <li>Bootstrap 5.3</li>
+                        <li>Font Awesome 6</li>
+                        <li>Адаптивный дизайн</li>
+                    </ul>
+                </div>
+                <div class="col-md-4">
+                    <strong>Функциональность:</strong>
+                    <ul>
+                        <li>Аутентификация</li>
+                        <li>Управление профилем</li>
+                        <li>Система курсов</li>
+                        <li>Админ-панель</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

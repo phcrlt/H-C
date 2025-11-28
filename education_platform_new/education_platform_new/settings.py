@@ -35,7 +35,7 @@ ROOT_URLCONF = 'education_platform_new.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [os.path.join(BASE_DIR, 'templates')],
+        'DIRS': [os.path.join(BASE_DIR, 'templates')],  # Убедитесь что это есть
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
