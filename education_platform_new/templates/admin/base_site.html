@@ -1,92 +1,57 @@
-{% extends "admin/base.html" %}
-{% load static %}
-
-{% block title %}{{ title }} | Образовательная платформа{% endblock %}
-
-{% block branding %}
-<h1 id="site-name">
-    <a href="{% url 'admin:index' %}">
-        <i class="fas fa-graduation-cap"></i>
-        Образовательная платформа - Админка
-    </a>
-</h1>
-{% endblock %}
-
-{% block extrastyle %}
-<style>
-    :root {
-        --primary: #4a6fa5;
-        --secondary: #6c757d;
-        --success: #28a745;
-        --info: #17a2b8;
-        --warning: #ffc107;
-        --danger: #dc3545;
-        --light: #f8f9fa;
-        --dark: #343a40;
-    }
-
-    #header {
-        background: linear-gradient(135deg, var(--primary) 0%, #667eea 100%);
-        color: white;
-    }
-
-    .module h2, .module caption, .inline-group h2 {
-        background: linear-gradient(135deg, var(--info) 0%, #17a2b8 100%);
-        color: white;
-    }
-
-    div.breadcrumbs {
-        background: linear-gradient(135deg, var(--secondary) 0%, #6c757d 100%);
-        color: white;
-    }
-
-    .button, input[type=submit], input[type=button], .submit-row input, a.button {
-        background: var(--primary);
-        color: white;
-        border: none;
-        border-radius: 4px;
-        padding: 10px 15px;
-        transition: all 0.3s ease;
-    }
-
-    .button:hover, input[type=submit]:hover, input[type=button]:hover, .submit-row input:hover, a.button:hover {
-        background: var(--info);
-        transform: translateY(-2px);
-        box-shadow: 0 4px 8px rgba(0,0,0,0.2);
-    }
-
-    .object-tools a {
-        background: var(--success);
-        color: white;
-    }
-
-    .object-tools a:hover {
-        background: var(--info);
-    }
-
-    #user-tools {
-        color: white;
-    }
-
-    #user-tools a {
-        color: white;
-        border-bottom: 1px solid rgba(255,255,255,0.3);
-    }
-
-    #user-tools a:hover {
-        color: var(--warning);
-        border-bottom-color: var(--warning);
-    }
-
-    .login .form-row {
-        margin-bottom: 15px;
-    }
-
-    .login .submit-row {
-        padding: 15px 0;
-    }
-</style>
-<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-{% endblock %}
-
-{% block nav-global %}{% endblock %}
+<nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+    <div class="container">
+        <a class="navbar-brand" href="/">
+            <i class="fas fa-graduation-cap me-2"></i>Образовательная платформа
+        </a>
+        
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav me-auto">
+                <li class="nav-item">
+                    <a class="nav-link" href="/">Главная</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/courses/">Курсы</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/lessons/">Уроки</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/assignments/">Задания</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/simple/">Простая версия</a>
+                </li>
+            </ul>
+            
+            <ul class="navbar-nav">
+                {% if user.is_authenticated %}
+                    <li class="nav-item">
+                        <a class="nav-link" href="/accounts/profile/">
+                            <i class="fas fa-user me-1"></i>Личный кабинет
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/accounts/logout/">
+                            <i class="fas fa-sign-out-alt me-1"></i>Выйти
+                        </a>
+                    </li>
+                {% else %}
+                    <li class="nav-item">
+                        <a class="nav-link" href="/accounts/login/">
+                            <i class="fas fa-sign-in-alt me-1"></i>Войти
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/accounts/register/">
+                            <i class="fas fa-user-plus me-1"></i>Регистрация
+                        </a>
+                    </li>
+                {% endif %}
+            </ul>
+        </div>
+    </div>
+</nav>

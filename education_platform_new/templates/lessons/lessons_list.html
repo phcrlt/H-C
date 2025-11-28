@@ -1,0 +1,54 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1><i class="fas fa-book-open me-2"></i>Все уроки</h1>
+    <a href="/courses/" class="btn btn-outline-primary">
+        <i class="fas fa-arrow-left me-1"></i>К курсам
+    </a>
+</div>
+
+<div class="row">
+    {% for lesson in lessons %}
+    <div class="col-md-6 mb-4">
+        <div class="card h-100 lesson-card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="card-title mb-0">{{ lesson.title }}</h5>
+                <span class="badge bg-secondary">{{ lesson.duration }} мин</span>
+            </div>
+            <div class="card-body">
+                <p class="card-text">{{ lesson.content|truncatewords:30 }}</p>
+                <div class="lesson-meta">
+                    <small class="text-muted">
+                        <i class="fas fa-graduation-cap me-1"></i>
+                        Курс: {{ lesson.course.title }}
+                    </small>
+                    <br>
+                    <small class="text-muted">
+                        <i class="fas fa-list-ol me-1"></i>
+                        Порядок: {{ lesson.order }}
+                    </small>
+                </div>
+            </div>
+            <div class="card-footer bg-transparent">
+                <div class="d-flex justify-content-between align-items-center">
+                    <span class="badge bg-{% if lesson.course.is_free %}success{% else %}warning{% endif %}">
+                        {% if lesson.course.is_free %}Бесплатно{% else %}Премиум{% endif %}
+                    </span>
+                    <a href="{% url 'lesson_detail' lesson.id %}" class="btn btn-primary btn-sm">
+                        <i class="fas fa-eye me-1"></i>Подробнее
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% empty %}
+    <div class="col-12">
+        <div class="alert alert-info text-center">
+            <h4>Уроки пока не добавлены</h4>
+            <p>Скоро здесь появятся учебные материалы!</p>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% endblock %}

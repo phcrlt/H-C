@@ -1,0 +1,71 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1><i class="fas fa-tasks me-2"></i>Все задания</h1>
+    <div class="btn-group">
+        <a href="/courses/" class="btn btn-outline-primary">Курсы</a>
+        <a href="/lessons/" class="btn btn-outline-primary">Уроки</a>
+    </div>
+</div>
+
+<div class="row">
+    {% for assignment in assignments %}
+    <div class="col-md-6 col-lg-4 mb-4">
+        <div class="card h-100 assignment-card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">{{ assignment.title }}</h5>
+            </div>
+            <div class="card-body d-flex flex-column">
+                <p class="card-text flex-grow-1">{{ assignment.description|truncatewords:20 }}</p>
+                
+                <div class="assignment-meta mb-3">
+                    <small class="text-muted d-block">
+                        <i class="fas fa-book me-1"></i>
+                        Урок: {{ assignment.lesson.title }}
+                    </small>
+                    <small class="text-muted d-block">
+                        <i class="fas fa-graduation-cap me-1"></i>
+                        Курс: {{ assignment.lesson.course.title }}
+                    </small>
+                    {% if assignment.deadline %}
+                    <small class="text-muted d-block">
+                        <i class="fas fa-clock me-1"></i>
+                        Дедлайн: {{ assignment.deadline|date:"d.m.Y H:i" }}
+                    </small>
+                    {% endif %}
+                    <small class="text-muted d-block">
+                        <i class="fas fa-star me-1"></i>
+                        Макс. балл: {{ assignment.max_score }}
+                    </small>
+                </div>
+                
+                <div class="mt-auto">
+                    {% if assignment.id in submitted_assignments %}
+                    <div class="alert alert-success py-2 mb-2">
+                        <i class="fas fa-check me-1"></i>
+                        <small>Работа сдана</small>
+                    </div>
+                    {% endif %}
+                    
+                    <a href="{% url 'assignment_detail' assignment.id %}" class="btn btn-primary w-100">
+                        {% if assignment.id in submitted_assignments %}
+                        <i class="fas fa-eye me-1"></i>Посмотреть
+                        {% else %}
+                        <i class="fas fa-paper-plane me-1"></i>Сдать работу
+                        {% endif %}
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% empty %}
+    <div class="col-12">
+        <div class="alert alert-info text-center">
+            <h4>Задания пока не добавлены</h4>
+            <p>Преподаватели скоро добавят учебные задания!</p>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% endblock %}
