@@ -1,0 +1,22 @@
+/* Дополнительные стили для темной темы Bootstrap */
+[data-theme="dark"] .btn-outline-primary {
+    border-color: #667eea;
+    color: #667eea;
+}
+
+[data-theme="dark"] .btn-outline-primary:hover {
+    background-color: #667eea;
+    border-color: #667eea;
+    color: white;
+}
+
+[data-theme="dark"] .table {
+    --bs-table-bg: var(--bg-card);
+    --bs-table-color: var(--text-primary);
+    --bs-table-border-color: var(--border-color);
+}
+
+[data-theme="dark"] .modal-content {
+    background-color: var(--bg-card);
+    color: var(--text-primary);
+}
