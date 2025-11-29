@@ -1,0 +1,264 @@
+/* Природная зеленая тема */
+[data-theme="nature"] {
+    --bg-primary: #f8fff8;
+    --bg-secondary: #e8f5e8;
+    --bg-card: #ffffff;
+    --text-primary: #1b4332;
+    --text-secondary: #40916c;
+    --border-color: #b7e4c7;
+    --accent-color: #2d6a4f;
+    --success-color: #40916c;
+    --warning-color: #f48c06;
+    --danger-color: #e63946;
+}
+
+* {
+    transition: background-color 0.5s ease, 
+                color 0.5s ease, 
+                border-color 0.5s ease,
+                box-shadow 0.5s ease;
+}
+
+
+[data-theme="nature"] body {
+    background-color: var(--bg-primary);
+    color: var(--text-primary);
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+/* Навигация */
+[data-theme="nature"] .navbar {
+    background: linear-gradient(135deg, #1b4332 0%, #028a39 100%) !important;
+    border-bottom: 2px solid #1b4332;
+}
+
+[data-theme="nature"] .navbar .nav-link {
+    color: rgba(255, 255, 255, 0.9) !important;
+    font-weight: 500;
+}
+
+[data-theme="nature"] .navbar .nav-link:hover {
+    color: white !important;
+    background-color: rgba(255, 255, 255, 0.1);
+    border-radius: 4px;
+}
+
+/* Кнопки */
+[data-theme="nature"] .btn-primary {
+    background: linear-gradient(135deg, #1b4332 0%, #028a39 100%);
+    border: none;
+    color: white;
+    font-weight: 600;
+}
+
+[data-theme="nature"] .btn-primary:hover {
+    background: linear-gradient(135deg, #1b4332 0%, #028a39 100%);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(45, 106, 79, 0.3);
+}
+
+[data-theme="nature"] .btn-outline-primary {
+    border-color: var(--accent-color);
+    color: var(--accent-color);
+    font-weight: 500;
+}
+
+[data-theme="nature"] .btn-outline-primary:hover {
+    background-color: var(--accent-color);
+    border-color: var(--accent-color);
+    color: white;
+}
+
+/* Карточки */
+[data-theme="nature"] .card {
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(45, 106, 79, 0.1);
+    transition: all 0.3s ease;
+}
+
+[data-theme="nature"] .card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 6px 20px rgba(45, 106, 79, 0.15);
+}
+
+[data-theme="nature"] .course-card {
+    border-left: 4px solid var(--accent-color);
+}
+
+[data-theme="nature"] .card .text-primary {
+    color: var(--accent-color) !important;
+}
+
+[data-theme="nature"] .card .text-success {
+    color: var(--success-color) !important;
+}
+
+[data-theme="nature"] .card .text-info {
+    color: var(--success-color) !important; /* Зеленый вместо синего */
+}
+
+/* Конкретно для иконок в карточках */
+[data-theme="nature"] .fa-book,
+[data-theme="nature"] .fa-chart-line,
+[data-theme="nature"] .fa-users {
+    color: var(--accent-color) !important;
+}
+
+
+/* Hero секция */
+[data-theme="nature"] .hero-section {
+    background: linear-gradient(135deg, #1b4332 0%, #028a39 100%) !important;
+}
+
+[data-theme="nature"] .hero-section h1 {
+    color: white !important;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+[data-theme="nature"] .hero-section .lead {
+    color: rgba(255, 255, 255, 0.9) !important;
+}
+
+[data-theme="nature"] .hero-section .btn-light {
+    background: rgba(255, 255, 255, 0.9) !important;
+    color: #2d6a4f !important;
+    font-weight: 600;
+}
+
+[data-theme="nature"] .hero-section .btn-outline-light {
+    border-color: rgba(255, 255, 255, 0.8) !important;
+    color: white !important;
+}
+
+[data-theme="nature"] .hero-section .btn-outline-light:hover {
+    background: white !important;
+    color: #2d6a4f !important;
+}
+
+/* Формы */
+[data-theme="nature"] .form-control, 
+[data-theme="nature"] .form-select {
+    background-color: var(--bg-card);
+    border: 1px solid var(--border-color);
+    color: var(--text-primary);
+    border-radius: 8px;
+}
+
+[data-theme="nature"] .form-control:focus, 
+[data-theme="nature"] .form-select:focus {
+    background-color: var(--bg-card);
+    border-color: var(--accent-color);
+    color: var(--text-primary);
+    box-shadow: 0 0 0 0.2rem rgba(45, 106, 79, 0.25);
+}
+
+/* Таблицы */
+[data-theme="nature"] .table {
+    --bs-table-bg: var(--bg-card);
+    --bs-table-color: var(--text-primary);
+    --bs-table-border-color: var(--border-color);
+}
+
+[data-theme="nature"] .table-hover tbody tr:hover {
+    background-color: var(--bg-secondary);
+}
+
+/* Уведомления */
+[data-theme="nature"] .alert {
+    background-color: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    color: var(--text-primary);
+    border-radius: 8px;
+}
+
+[data-theme="nature"] .alert-success {
+    background-color: #d8f3dc;
+    border-color: var(--success-color);
+    color: #1b4332;
+}
+
+/* Бейджи */
+[data-theme="nature"] .badge.bg-success {
+    background-color: var(--success-color) !important;
+}
+
+[data-theme="nature"] .badge.bg-primary {
+    background: linear-gradient(135deg, #1b4332 0%, #028a39 100%) !important;
+}
+
+[data-theme="nature"] .badge.bg-warning {
+    background-color: var(--warning-color) !important;
+    color: #1b4332;
+}
+
+/* Футер */
+[data-theme="nature"] footer.bg-dark {
+    background: linear-gradient(135deg, #1b4332 0%, #028a39 100%) !important;
+    color: white;
+}
+
+[data-theme="nature"] footer a {
+    color: rgba(255, 255, 255, 0.8) !important;
+}
+
+[data-theme="nature"] footer a:hover {
+    color: white !important;
+}
+
+/* Модальные окна */
+[data-theme="nature"] .modal-content {
+    background-color: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    color: var(--text-primary);
+}
+
+/* Выпадающие меню */
+[data-theme="nature"] .dropdown-menu {
+    background-color: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(45, 106, 79, 0.15);
+}
+
+[data-theme="nature"] .dropdown-item {
+    color: var(--text-primary);
+}
+
+[data-theme="nature"] .dropdown-item:hover {
+    background-color: var(--bg-secondary);
+    color: var(--text-primary);
+}
+
+/* Прогресс-бары */
+[data-theme="nature"] .progress {
+    background-color: var(--bg-secondary);
+    border-radius: 10px;
+}
+
+[data-theme="nature"] .progress-bar {
+    background: linear-gradient(135deg, #1b4332 0%, #028a39 100%);
+}
+
+/* Иконки в природной теме */
+[data-theme="nature"] .text-primary {
+    color: var(--accent-color) !important;
+}
+
+[data-theme="nature"] .text-success {
+    color: var(--success-color) !important;
+}
+
+/* Тени и акценты */
+[data-theme="nature"] .bg-light {
+    background-color: var(--bg-secondary) !important;
+}
+
+[data-theme="nature"] .text-muted {
+    color: var(--text-secondary) !important;
+}
+
+[data-theme="nature"] .border {
+    border-color: var(--border-color) !important;
+}

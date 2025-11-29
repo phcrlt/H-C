@@ -1,0 +1,239 @@
+/* Океанская синяя тема - свежая и глубокая */
+[data-theme="ocean"] {
+    --bg-primary: #f0f8ff;
+    --bg-secondary: #e1f5fe;
+    --bg-card: #ffffff;
+    --text-primary: #023e8a;
+    --text-secondary: #0077b6;
+    --border-color: #90e0ef;
+    --accent-color: #0077b6;
+    --success-color: #00b4d8;
+    --warning-color: #ff9e00;
+    --danger-color: #ef476f;
+}
+
+[data-theme="ocean"] body {
+    background-color: var(--bg-primary);
+    color: var(--text-primary);
+}
+
+/* Навигация */
+[data-theme="ocean"] .navbar {
+    background: linear-gradient(135deg, #0077b6 0%, #00b4d8 100%) !important;
+}
+
+[data-theme="ocean"] .navbar .nav-link {
+    color: rgba(255, 255, 255, 0.9) !important;
+}
+
+[data-theme="ocean"] .navbar .nav-link:hover {
+    color: white !important;
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+/* Кнопки */
+[data-theme="ocean"] .btn-primary {
+    background: linear-gradient(135deg, #0077b6 0%, #00b4d8 100%);
+    border: none;
+    color: white;
+}
+
+[data-theme="ocean"] .btn-primary:hover {
+    background: linear-gradient(135deg, #0069a3 0%, #0099c7 100%);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(0, 119, 182, 0.3);
+}
+
+[data-theme="ocean"] .btn-outline-primary {
+    border-color: var(--accent-color);
+    color: var(--accent-color);
+}
+
+[data-theme="ocean"] .btn-outline-primary:hover {
+    background-color: var(--accent-color);
+    border-color: var(--accent-color);
+    color: white;
+}
+
+/* Карточки */
+[data-theme="ocean"] .card {
+    background-color: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0, 119, 182, 0.1);
+    transition: all 0.3s ease;
+}
+
+[data-theme="ocean"] .card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 6px 20px rgba(0, 119, 182, 0.15);
+}
+
+[data-theme="ocean"] .card-header {
+    background: linear-gradient(135deg, #0077b6 0%, #00b4d8 100%);
+    color: white;
+    border-bottom: none;
+    border-radius: 12px 12px 0 0 !important;
+}
+
+[data-theme="ocean"] .course-card {
+    border-left: 4px solid var(--accent-color);
+}
+
+/* Hero секция */
+[data-theme="ocean"] .hero-section {
+    background: linear-gradient(135deg, #0077b6 0%, #00b4d8 100%) !important;
+    border-radius: 12px;
+}
+
+[data-theme="ocean"] .hero-section h1 {
+    color: white !important;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+[data-theme="ocean"] .hero-section .lead {
+    color: rgba(255, 255, 255, 0.9) !important;
+}
+
+[data-theme="ocean"] .hero-section .btn-light {
+    background: rgba(255, 255, 255, 0.9) !important;
+    color: #0077b6 !important;
+    font-weight: 600;
+}
+
+[data-theme="ocean"] .hero-section .btn-outline-light {
+    border-color: rgba(255, 255, 255, 0.8) !important;
+    color: white !important;
+}
+
+[data-theme="ocean"] .hero-section .btn-outline-light:hover {
+    background: white !important;
+    color: #0077b6 !important;
+}
+
+/* Формы */
+[data-theme="ocean"] .form-control,
+[data-theme="ocean"] .form-select {
+    background-color: var(--bg-card);
+    border: 1px solid var(--border-color);
+    color: var(--text-primary);
+    border-radius: 8px;
+}
+
+[data-theme="ocean"] .form-control:focus,
+[data-theme="ocean"] .form-select:focus {
+    background-color: var(--bg-card);
+    border-color: var(--accent-color);
+    color: var(--text-primary);
+    box-shadow: 0 0 0 0.2rem rgba(0, 119, 182, 0.25);
+}
+
+/* Таблицы */
+[data-theme="ocean"] .table {
+    --bs-table-bg: var(--bg-card);
+    --bs-table-color: var(--text-primary);
+    --bs-table-border-color: var(--border-color);
+}
+
+[data-theme="ocean"] .table-hover tbody tr:hover {
+    background-color: var(--bg-secondary);
+}
+
+/* Уведомления */
+[data-theme="ocean"] .alert {
+    background-color: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    color: var(--text-primary);
+    border-radius: 8px;
+}
+
+[data-theme="ocean"] .alert-success {
+    background-color: #caf0f8;
+    border-color: var(--success-color);
+    color: #0077b6;
+}
+
+/* Бейджи */
+[data-theme="ocean"] .badge.bg-primary {
+    background: linear-gradient(135deg, #0077b6 0%, #00b4d8 100%) !important;
+}
+
+[data-theme="ocean"] .badge.bg-success {
+    background-color: var(--success-color) !important;
+}
+
+[data-theme="ocean"] .badge.bg-warning {
+    background-color: var(--warning-color) !important;
+    color: #023e8a;
+}
+
+/* Футер */
+[data-theme="ocean"] footer.bg-dark {
+    background: linear-gradient(135deg, #023e8a 0%, #0077b6 100%) !important;
+    color: white;
+}
+
+[data-theme="ocean"] footer a {
+    color: rgba(255, 255, 255, 0.8) !important;
+}
+
+[data-theme="ocean"] footer a:hover {
+    color: white !important;
+}
+
+/* Модальные окна */
+[data-theme="ocean"] .modal-content {
+    background-color: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    color: var(--text-primary);
+}
+
+/* Выпадающие меню */
+[data-theme="ocean"] .dropdown-menu {
+    background-color: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 119, 182, 0.15);
+}
+
+[data-theme="ocean"] .dropdown-item {
+    color: var(--text-primary);
+}
+
+[data-theme="ocean"] .dropdown-item:hover {
+    background-color: var(--bg-secondary);
+    color: var(--text-primary);
+}
+
+/* Иконки */
+[data-theme="ocean"] .text-primary {
+    color: var(--accent-color) !important;
+}
+
+[data-theme="ocean"] .text-success {
+    color: var(--success-color) !important;
+}
+
+/* Прогресс-бары */
+[data-theme="ocean"] .progress {
+    background-color: var(--bg-secondary);
+    border-radius: 10px;
+}
+
+[data-theme="ocean"] .progress-bar {
+    background: linear-gradient(135deg, #0077b6 0%, #00b4d8 100%);
+}
+
+/* Тени и акценты */
+[data-theme="ocean"] .bg-light {
+    background-color: var(--bg-secondary) !important;
+}
+
+[data-theme="ocean"] .text-muted {
+    color: var(--text-secondary) !important;
+}
+
+[data-theme="ocean"] .border {
+    border-color: var(--border-color) !important;
+}

@@ -1,55 +1,222 @@
 {% extends 'base.html' %}
 
 {% block content %}
-<div class="d-flex justify-content-between align-items-center mb-4">
-    <h1><i class="fas fa-book me-2"></i>Все курсы</h1>
-    <div class="btn-group">
-        <button class="btn btn-outline-primary active">Все</button>
-        <button class="btn btn-outline-primary">Бесплатные</button>
-        <button class="btn btn-outline-primary">Премиум</button>
-    </div>
-</div>
-
-<div class="row">
-    {% for course in courses %}
-    <div class="col-md-6 col-lg-4 mb-4">
-        <div class="card h-100 course-card">
-            <div class="card-header bg-{% if course.is_free %}success{% else %}warning{% endif %} text-white">
-                <h5 class="card-title mb-0">{{ course.title }}</h5>
-            </div>
-            <div class="card-body d-flex flex-column">
-                <p class="card-text flex-grow-1">{{ course.description|truncatewords:20 }}</p>
-                <div class="mt-auto">
-                    <div class="d-flex justify-content-between align-items-center mb-2">
-                        <span class="badge bg-{% if course.is_free %}success{% else %}warning{% endif %}">
-                            {% if course.is_free %}Бесплатно{% else %}{{ course.price }} руб.{% endif %}
-                        </span>
-                        <small class="text-muted">{{ course.duration }}</small>
-                    </div>
-                    <div class="mb-2">
-                        <span class="badge bg-secondary">{{ course.get_level_display }}</span>
-                    </div>
-                    <!-- ДОБАВЛЕНА КНОПКА УРОКОВ -->
-                    <div class="d-grid gap-2">
-                        <a href="/lessons/?course={{ course.id }}" class="btn btn-outline-primary btn-sm">
-                            <i class="fas fa-book-open me-1"></i>Уроки курса
-                        </a>
-                        <button class="btn btn-primary w-100">
-                            <i class="fas fa-play me-1"></i>Начать курс
-                        </button>
+<div class="container">
+    <!-- Заголовок и поиск -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body p-4">
+                    <div class="row align-items-center">
+                        <div class="col-md-6">
+                            <h1 class="h3 mb-0 fw-bold">Все курсы</h1>
+                            <p class="text-muted mb-0">Найдите подходящий курс для обучения</p>
+                        </div>
+                        <div class="col-md-6">
+                            <!-- Строка поиска -->
+                            <form method="get" class="d-flex">
+                                <div class="input-group">
+                                    <input type="text" 
+                                           name="search" 
+                                           class="form-control" 
+                                           placeholder="Поиск по названию или описанию..."
+                                           value="{{ search_query }}">
+                                    <button class="btn btn-primary" type="submit">
+                                        <i class="fas fa-search"></i>
+                                    </button>
+                                    {% if search_query or level_filter or type_filter %}
+                                    <a href="{% url 'courses_list' %}" class="btn btn-outline-secondary">
+                                        <i class="fas fa-times"></i>
+                                    </a>
+                                    {% endif %}
+                                </div>
+                            </form>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
-    {% empty %}
-    <div class="col-12">
-        <div class="alert alert-info text-center">
-            <h4>Курсы пока не добавлены</h4>
-            <p>Скоро здесь появятся интересные образовательные материалы!</p>
-            <a href="/admin/core/course/add/" class="btn btn-primary">Добавить курс через админку</a>
+
+    <div class="row">
+        <!-- Боковая панель фильтров -->
+        <div class="col-lg-3 mb-4">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-white border-0">
+                    <h5 class="mb-0 fw-bold"><i class="fas fa-filter me-2"></i>Фильтры</h5>
+                </div>
+                <div class="card-body">
+                    <!-- Фильтр по типу курса -->
+                    <div class="mb-4">
+                        <h6 class="fw-bold mb-3">Тип курса</h6>
+                        <div class="list-group list-group-flush">
+                            <a href="?{% if search_query %}search={{ search_query }}&{% endif %}{% if level_filter %}level={{ level_filter }}&{% endif %}"
+                               class="list-group-item list-group-item-action d-flex justify-content-between align-items-center {% if not type_filter %}active{% endif %}">
+                                Все курсы
+                                <span class="badge bg-primary rounded-pill">{{ total_courses }}</span>
+                            </a>
+                            <a href="?{% if search_query %}search={{ search_query }}&{% endif %}{% if level_filter %}level={{ level_filter }}&{% endif %}type=free"
+                               class="list-group-item list-group-item-action d-flex justify-content-between align-items-center {% if type_filter == 'free' %}active{% endif %}">
+                                Бесплатные
+                                <span class="badge bg-success rounded-pill">{{ free_courses }}</span>
+                            </a>
+                            <a href="?{% if search_query %}search={{ search_query }}&{% endif %}{% if level_filter %}level={{ level_filter }}&{% endif %}type=premium"
+                               class="list-group-item list-group-item-action d-flex justify-content-between align-items-center {% if type_filter == 'premium' %}active{% endif %}">
+                                Премиум
+                                <span class="badge bg-warning rounded-pill">{{ premium_courses }}</span>
+                            </a>
+                        </div>
+                    </div>
+
+                    <!-- Фильтр по уровню -->
+                    <div class="mb-3">
+                        <h6 class="fw-bold mb-3">Уровень сложности</h6>
+                        <div class="list-group list-group-flush">
+                            <a href="?{% if search_query %}search={{ search_query }}&{% endif %}{% if type_filter %}type={{ type_filter }}&{% endif %}"
+                               class="list-group-item list-group-item-action d-flex justify-content-between align-items-center {% if not level_filter %}active{% endif %}">
+                                Все уровни
+                                <span class="badge bg-primary rounded-pill">{{ total_courses }}</span>
+                            </a>
+                            <a href="?{% if search_query %}search={{ search_query }}&{% endif %}{% if type_filter %}type={{ type_filter }}&{% endif %}level=beginner"
+                               class="list-group-item list-group-item-action d-flex justify-content-between align-items-center {% if level_filter == 'beginner' %}active{% endif %}">
+                                Начальный
+                                <span class="badge bg-success rounded-pill">{{ level_counts.beginner }}</span>
+                            </a>
+                            <a href="?{% if search_query %}search={{ search_query }}&{% endif %}{% if type_filter %}type={{ type_filter }}&{% endif %}level=intermediate"
+                               class="list-group-item list-group-item-action d-flex justify-content-between align-items-center {% if level_filter == 'intermediate' %}active{% endif %}">
+                                Средний
+                                <span class="badge bg-warning rounded-pill">{{ level_counts.intermediate }}</span>
+                            </a>
+                            <a href="?{% if search_query %}search={{ search_query }}&{% endif %}{% if type_filter %}type={{ type_filter }}&{% endif %}level=advanced"
+                               class="list-group-item list-group-item-action d-flex justify-content-between align-items-center {% if level_filter == 'advanced' %}active{% endif %}">
+                                Продвинутый
+                                <span class="badge bg-danger rounded-pill">{{ level_counts.advanced }}</span>
+                            </a>
+                        </div>
+                    </div>
+
+                    <!-- Сброс фильтров -->
+                    {% if search_query or level_filter or type_filter %}
+                    <div class="mt-4">
+                        <a href="{% url 'courses_list' %}" class="btn btn-outline-secondary w-100">
+                            <i class="fas fa-undo me-1"></i>Сбросить все фильтры
+                        </a>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Основной контент -->
+        <div class="col-lg-9">
+            <!-- Статистика и результаты -->
+            {% if search_query or level_filter or type_filter %}
+            <div class="row mb-3">
+                <div class="col-12">
+                    <div class="alert alert-info">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <i class="fas fa-info-circle me-2"></i>
+                                Найдено курсов: <strong>{{ courses.count }}</strong>
+                                {% if search_query %} по запросу "{{ search_query }}"{% endif %}
+                                {% if level_filter %} уровня "{{ level_filter }}"{% endif %}
+                                {% if type_filter == 'free' %} (бесплатные){% endif %}
+                                {% if type_filter == 'premium' %} (премиум){% endif %}
+                            </div>
+                            <a href="{% url 'courses_list' %}" class="btn btn-sm btn-outline-info">
+                                Показать все {{ total_courses }} курсов
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Сетка курсов -->
+            <div class="row">
+                {% if courses %}
+                    {% for course in courses %}
+                    <div class="col-xl-4 col-lg-6 mb-4">
+                        <div class="card h-100 course-card border-0 shadow-sm hover-shadow">
+                            {% if course.image %}
+                            <img src="{{ course.image.url }}" class="card-img-top" alt="{{ course.title }}" style="height: 200px; object-fit: cover;">
+                            {% else %}
+                            <div class="card-img-top bg-light d-flex align-items-center justify-content-center" style="height: 200px;">
+                                <i class="fas fa-book fa-3x text-muted"></i>
+                            </div>
+                            {% endif %}
+                            
+                            <div class="card-body">
+                                <h5 class="card-title fw-bold">{{ course.title }}</h5>
+                                <p class="card-text text-muted">{{ course.short_description|default:course.description|truncatewords:20 }}</p>
+                                
+                                <div class="mb-3">
+                                    <span class="badge {% if course.level == 'beginner' %}bg-success{% elif course.level == 'intermediate' %}bg-warning text-dark{% else %}bg-danger{% endif %}">
+                                        {{ course.get_level_display }}
+                                    </span>
+                                    <span class="badge {% if course.is_free %}bg-info{% else %}bg-primary{% endif %} ms-1">
+                                        {% if course.is_free %}Бесплатно{% else %}Премиум{% endif %}
+                                    </span>
+                                </div>
+                                
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <small class="text-muted">
+                                        <i class="fas fa-clock me-1"></i>{{ course.duration }}
+                                    </small>
+                                    <small class="text-muted">
+                                        {{ course.lessons.count }} уроков
+                                    </small>
+                                </div>
+                            </div>
+                            
+                            <div class="card-footer bg-transparent border-0 pb-3">
+                                <div class="d-grid gap-2">
+                                    <a href="{% url 'lessons_list' %}?course={{ course.id }}" class="btn btn-outline-primary btn-sm">
+                                        <i class="fas fa-book-open me-1"></i>Смотреть уроки
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                {% else %}
+                    <div class="col-12">
+                        <div class="card border-0 shadow-sm">
+                            <div class="card-body text-center py-5">
+                                <i class="fas fa-search fa-3x text-muted mb-3"></i>
+                                <h4 class="text-muted">Курсы не найдены</h4>
+                                <p class="text-muted">
+                                    {% if search_query %}
+                                        Попробуйте изменить поисковый запрос "{{ search_query }}" или сбросить фильтры
+                                    {% else %}
+                                        Курсы скоро будут добавлены
+                                    {% endif %}
+                                </p>
+                                {% if search_query or level_filter or type_filter %}
+                                <a href="{% url 'courses_list' %}" class="btn btn-primary">
+                                    <i class="fas fa-arrow-left me-1"></i>Вернуться ко всем курсам
+                                </a>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                {% endif %}
+            </div>
         </div>
     </div>
-    {% endfor %}
 </div>
+
+<style>
+.hover-shadow {
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+.hover-shadow:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(0,0,0,0.15) !important;
+}
+.list-group-item.active {
+    background-color: #0d6efd;
+    border-color: #0d6efd;
+}
+</style>
 {% endblock %}

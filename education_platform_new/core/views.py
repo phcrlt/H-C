@@ -1,5 +1,6 @@
 from django.shortcuts import render, get_object_or_404
 from django.http import JsonResponse
+from django.db import models 
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.shortcuts import redirect
@@ -11,9 +12,6 @@ def home(request):
         'courses': courses
     }
     return render(request, 'index.html', context)
-
-def home_simple(request):
-    return render(request, 'index_simple.html')
 
 def courses_list(request):
     courses = Course.objects.all()
@@ -114,3 +112,70 @@ def submit_assignment(request, assignment_id):
         return redirect('assignment_detail', assignment_id=assignment_id)
     
     return redirect('assignment_detail', assignment_id=assignment_id)
+
+def courses_list(request):
+    search_query = request.GET.get('search', '')
+    
+    courses = Course.objects.all()
+    
+    if search_query:
+        courses = courses.filter(
+            models.Q(title__icontains=search_query) |
+            models.Q(description__icontains=search_query) |
+            models.Q(short_description__icontains=search_query)
+        )
+    
+    context = {
+        'courses': courses,
+        'search_query': search_query
+    }
+    return render(request, 'courses/courses_list.html', context)
+
+def courses_list(request):
+    search_query = request.GET.get('search', '')
+    level_filter = request.GET.get('level', '')
+    type_filter = request.GET.get('type', '')
+    
+    courses = Course.objects.all()
+    
+    # Поиск
+    if search_query:
+        courses = courses.filter(
+            models.Q(title__icontains=search_query) |
+            models.Q(description__icontains=search_query) |
+            models.Q(short_description__icontains=search_query)
+        )
+    
+    # Фильтрация по уровню
+    if level_filter:
+        courses = courses.filter(level=level_filter)
+    
+    # Фильтрация по типу (бесплатные/премиум)
+    if type_filter:
+        if type_filter == 'free':
+            courses = courses.filter(is_free=True)
+        elif type_filter == 'premium':
+            courses = courses.filter(is_free=False)
+    
+    # Получаем количество курсов по каждому фильтру для отображения
+    total_courses = Course.objects.count()
+    free_courses = Course.objects.filter(is_free=True).count()
+    premium_courses = Course.objects.filter(is_free=False).count()
+    
+    level_counts = {
+        'beginner': Course.objects.filter(level='beginner').count(),
+        'intermediate': Course.objects.filter(level='intermediate').count(),
+        'advanced': Course.objects.filter(level='advanced').count(),
+    }
+    
+    context = {
+        'courses': courses,
+        'search_query': search_query,
+        'level_filter': level_filter,
+        'type_filter': type_filter,
+        'total_courses': total_courses,
+        'free_courses': free_courses,
+        'premium_courses': premium_courses,
+        'level_counts': level_counts,
+    }
+    return render(request, 'courses/courses_list.html', context)
