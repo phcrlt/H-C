@@ -1,0 +1,115 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body p-4">
+                    <h1 class="h3 mb-2 fw-bold">
+                        <i class="fas fa-cog me-2 text-primary"></i>
+                        Управление контентом
+                    </h1>
+                    <p class="text-muted mb-0">Создание и редактирование учебных материалов</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Быстрый доступ -->
+        <div class="col-lg-8 mb-4">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-white">
+                    <h5 class="mb-0 fw-bold">Быстрые действия</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <div class="card h-100 border-0 bg-light">
+                                <div class="card-body text-center">
+                                    <i class="fas fa-book fa-3x text-primary mb-3"></i>
+                                    <h5>Курсы</h5>
+                                    <p class="text-muted small">Создание и управление курсами</p>
+                                    <div class="d-grid gap-2">
+                                        <a href="/admin/core/course/" class="btn btn-primary btn-sm">Все курсы</a>
+                                        <a href="/admin/core/course/add/" class="btn btn-outline-primary btn-sm">Создать курс</a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <div class="card h-100 border-0 bg-light">
+                                <div class="card-body text-center">
+                                    <i class="fas fa-file-alt fa-3x text-success mb-3"></i>
+                                    <h5>Уроки</h5>
+                                    <p class="text-muted small">Добавление уроков в курсы</p>
+                                    <div class="d-grid gap-2">
+                                        <a href="/admin/core/lesson/" class="btn btn-success btn-sm">Все уроки</a>
+                                        <a href="/admin/core/lesson/add/" class="btn btn-outline-success btn-sm">Создать урок</a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <div class="card h-100 border-0 bg-light">
+                                <div class="card-body text-center">
+                                    <i class="fas fa-tasks fa-3x text-warning mb-3"></i>
+                                    <h5>Задания</h5>
+                                    <p class="text-muted small">Создание учебных заданий</p>
+                                    <div class="d-grid gap-2">
+                                        <a href="/admin/core/assignment/" class="btn btn-warning btn-sm">Все задания</a>
+                                        <a href="/admin/core/assignment/add/" class="btn btn-outline-warning btn-sm">Создать задание</a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <div class="card h-100 border-0 bg-light">
+                                <div class="card-body text-center">
+                                    <i class="fas fa-users fa-3x text-info mb-3"></i>
+                                    <h5>Студенты</h5>
+                                    <p class="text-muted small">Управление студентами</p>
+                                    <div class="d-grid gap-2">
+                                        <a href="/admin/auth/user/" class="btn btn-info btn-sm">Все пользователи</a>
+                                        <a href="/admin/accounts/userprofile/" class="btn btn-outline-info btn-sm">Профили</a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Статистика -->
+        <div class="col-lg-4 mb-4">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-white">
+                    <h5 class="mb-0 fw-bold">Статистика</h5>
+                </div>
+                <div class="card-body">
+                    <div class="list-group list-group-flush">
+                        <div class="list-group-item d-flex justify-content-between align-items-center">
+                            Курсы
+                            <span class="badge bg-primary rounded-pill">{{ courses_count }}</span>
+                        </div>
+                        <div class="list-group-item d-flex justify-content-between align-items-center">
+                            Уроки
+                            <span class="badge bg-success rounded-pill">{{ lessons_count }}</span>
+                        </div>
+                        <div class="list-group-item d-flex justify-content-between align-items-center">
+                            Задания
+                            <span class="badge bg-warning rounded-pill">{{ assignments_count }}</span>
+                        </div>
+                        <div class="list-group-item d-flex justify-content-between align-items-center">
+                            Студенты
+                            <span class="badge bg-info rounded-pill">{{ students_count }}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

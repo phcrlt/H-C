@@ -1,0 +1,226 @@
+{% extends 'base.html' %}
+
+{% block title %}Оценка работы - Преподаватель{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-lg-10">
+            <!-- Заголовок -->
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-body p-4">
+                    <div class="row align-items-center">
+                        <div class="col-md-8">
+                            <h1 class="h3 mb-2 fw-bold">
+                                <i class="fas fa-check-circle me-2 text-primary"></i>
+                                Оценка работы
+                            </h1>
+                            <p class="text-muted mb-0">Оцените работу студента и оставьте комментарий</p>
+                        </div>
+                        <div class="col-md-4 text-end">
+                            <a href="{% url 'teacher_submissions' %}" class="btn btn-outline-primary">
+                                <i class="fas fa-arrow-left me-2"></i>Назад к списку
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Сообщения -->
+            {% if messages %}
+                {% for message in messages %}
+                    <div class="alert alert-{{ message.tags }} alert-dismissible fade show">
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                {% endfor %}
+            {% endif %}
+
+            <!-- Информация о работе -->
+            <div class="row">
+                <div class="col-lg-8">
+                    <!-- Форма оценки -->
+                    <div class="card border-0 shadow-sm mb-4">
+                        <div class="card-header bg-white">
+                            <h5 class="mb-0 fw-bold">Оценка работы</h5>
+                        </div>
+                        <div class="card-body">
+                            <form method="post">
+                                {% csrf_token %}
+                                
+                                <!-- Оценка -->
+                                <div class="mb-4">
+                                    <label class="form-label fw-bold">Оценка (баллы)</label>
+                                    <div class="row align-items-center">
+                                        <div class="col-md-6">
+                                            <input type="range" 
+                                                   class="form-range" 
+                                                   id="scoreRange"
+                                                   min="0" 
+                                                   max="{{ max_score }}" 
+                                                   value="{{ existing_grade.score|default:50 }}"
+                                                   oninput="updateScoreValue(this.value)">
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="input-group">
+                                                <input type="number" 
+                                                       name="score" 
+                                                       id="scoreInput"
+                                                       class="form-control" 
+                                                       min="0" 
+                                                       max="{{ max_score }}"
+                                                       value="{{ existing_grade.score|default:50 }}"
+                                                       required>
+                                                <span class="input-group-text">/ {{ max_score }}</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="mt-2">
+                                        <small class="text-muted">
+                                            Установите оценку от 0 до {{ max_score }} баллов
+                                        </small>
+                                    </div>
+                                </div>
+
+                                <!-- Комментарий -->
+                                <div class="mb-4">
+                                    <label class="form-label fw-bold">Комментарий преподавателя</label>
+                                    <textarea name="feedback" 
+                                              class="form-control" 
+                                              rows="6" 
+                                              placeholder="Оставьте развернутый комментарий к работе...">{{ existing_grade.feedback|default:'' }}</textarea>
+                                    <div class="mt-2">
+                                        <small class="text-muted">
+                                            Комментарий будет виден студенту
+                                        </small>
+                                    </div>
+                                </div>
+
+                                <!-- Кнопки -->
+                                <div class="d-flex gap-2">
+                                    <button type="submit" class="btn btn-success">
+                                        <i class="fas fa-save me-2"></i>
+                                        {% if existing_grade %}Обновить оценку{% else %}Сохранить оценку{% endif %}
+                                    </button>
+                                    <a href="{% url 'teacher_submissions' %}" class="btn btn-outline-secondary">
+                                        Отмена
+                                    </a>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-lg-4">
+                    <!-- Информация о студенте -->
+                    <div class="card border-0 shadow-sm mb-4">
+                        <div class="card-header bg-white">
+                            <h5 class="mb-0 fw-bold">Информация о студенте</h5>
+                        </div>
+                        <div class="card-body text-center">
+                            {% if submission.student.userprofile.avatar %}
+                            <img src="{{ submission.student.userprofile.avatar.url }}" 
+                                 class="rounded-circle mb-3" 
+                                 width="80" 
+                                 height="80" 
+                                 alt="Аватар">
+                            {% else %}
+                            <div class="rounded-circle bg-primary d-inline-flex align-items-center justify-content-center mb-3" 
+                                 style="width: 80px; height: 80px;">
+                                <i class="fas fa-user fa-2x text-white"></i>
+                            </div>
+                            {% endif %}
+                            
+                            <h6 class="fw-bold">{{ submission.student.get_full_name|default:submission.student.username }}</h6>
+                            <p class="text-muted small mb-2">{{ submission.student.email }}</p>
+                            
+                            <div class="mt-3">
+                                <span class="badge bg-success">Студент</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Информация о задании -->
+                    <div class="card border-0 shadow-sm">
+                        <div class="card-header bg-white">
+                            <h5 class="mb-0 fw-bold">Информация о задании</h5>
+                        </div>
+                        <div class="card-body">
+                            <h6 class="fw-bold">{{ submission.assignment.title }}</h6>
+                            <p class="text-muted small mb-2">{{ submission.assignment.description|truncatewords:20 }}</p>
+                            
+                            <div class="mb-2">
+                                <strong>Курс:</strong><br>
+                                <span class="text-muted">{{ submission.assignment.lesson.course.title }}</span>
+                            </div>
+                            
+                            <div class="mb-2">
+                                <strong>Урок:</strong><br>
+                                <span class="text-muted">{{ submission.assignment.lesson.title }}</span>
+                            </div>
+                            
+                            <div class="mb-2">
+                                <strong>Макс. балл:</strong><br>
+                                <span class="text-muted">{{ max_score }}</span>
+                            </div>
+                            
+                            <div class="mb-2">
+                                <strong>Сдано:</strong><br>
+                                <span class="text-muted">{{ submission.submitted_at|date:"d.m.Y H:i" }}</span>
+                            </div>
+
+                            <!-- Скачать работу -->
+                            {% if submission.file %}
+                            <div class="mt-3">
+                                <a href="{{ submission.file.url }}" 
+                                   class="btn btn-outline-primary btn-sm w-100"
+                                   target="_blank">
+                                    <i class="fas fa-download me-2"></i>Скачать работу
+                                </a>
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function updateScoreValue(value) {
+    document.getElementById('scoreInput').value = value;
+}
+
+function updateScoreRange(value) {
+    document.getElementById('scoreRange').value = value;
+}
+
+// Синхронизация range и input
+document.getElementById('scoreInput').addEventListener('input', function(e) {
+    updateScoreRange(e.target.value);
+});
+
+document.getElementById('scoreRange').addEventListener('input', function(e) {
+    updateScoreValue(e.target.value);
+});
+
+// Инициализация при загрузке
+document.addEventListener('DOMContentLoaded', function() {
+    const initialValue = document.getElementById('scoreInput').value;
+    updateScoreRange(initialValue);
+});
+</script>
+
+<style>
+.card {
+    border-radius: 12px;
+}
+.form-range::-webkit-slider-thumb {
+    background: #0d6efd;
+}
+.form-range::-moz-range-thumb {
+    background: #0d6efd;
+}
+</style>
+{% endblock %}

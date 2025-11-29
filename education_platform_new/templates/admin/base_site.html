@@ -1,57 +1,68 @@
-<nav class="navbar navbar-expand-lg navbar-dark bg-primary">
-    <div class="container">
-        <a class="navbar-brand" href="/">
-            <i class="fas fa-graduation-cap me-2"></i>Образовательная платформа
-        </a>
-        
-        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-            <span class="navbar-toggler-icon"></span>
-        </button>
-        
-        <div class="collapse navbar-collapse" id="navbarNav">
-            <ul class="navbar-nav me-auto">
-                <li class="nav-item">
-                    <a class="nav-link" href="/">Главная</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="/courses/">Курсы</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="/lessons/">Уроки</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="/assignments/">Задания</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="/simple/">Простая версия</a>
-                </li>
-            </ul>
-            
-            <ul class="navbar-nav">
-                {% if user.is_authenticated %}
-                    <li class="nav-item">
-                        <a class="nav-link" href="/accounts/profile/">
-                            <i class="fas fa-user me-1"></i>Личный кабинет
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="/accounts/logout/">
-                            <i class="fas fa-sign-out-alt me-1"></i>Выйти
-                        </a>
-                    </li>
-                {% else %}
-                    <li class="nav-item">
-                        <a class="nav-link" href="/accounts/login/">
-                            <i class="fas fa-sign-in-alt me-1"></i>Войти
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="/accounts/register/">
-                            <i class="fas fa-user-plus me-1"></i>Регистрация
-                        </a>
-                    </li>
-                {% endif %}
-            </ul>
-        </div>
-    </div>
-</nav>
+{% extends "admin/base.html" %}
+{% load static %}
+
+{% block title %}{{ title }} | Образовательная платформа{% endblock %}
+
+{% block branding %}
+<h1 id="site-name">
+    <a href="{% url 'admin:index' %}">
+        <i class="fas fa-graduation-cap"></i>
+        Образовательная платформа - Администрирование
+    </a>
+</h1>
+{% endblock %}
+
+{% block extrastyle %}
+{{ block.super }}
+<style>
+:root {
+    --primary: #4f46e5;
+    --secondary: #6b7280;
+    --accent: #10b981;
+}
+
+#header {
+    background: linear-gradient(135deg, var(--primary) 0%, #7c3aed 100%);
+    color: white;
+}
+
+#branding h1 {
+    color: white;
+    font-weight: 600;
+}
+
+#branding h1 a {
+    color: white;
+    text-decoration: none;
+}
+
+.module h2, .module caption, .inline-group h2 {
+    background: linear-gradient(135deg, var(--primary) 0%, #7c3aed 100%);
+}
+
+a:link, a:visited {
+    color: var(--primary);
+}
+
+a:hover {
+    color: #3730a3;
+}
+
+.button, input[type=submit], input[type=button], .submit-row input {
+    background: var(--primary);
+    color: white;
+}
+
+.button:hover, input[type=submit]:hover, input[type=button]:hover {
+    background: #3730a3;
+}
+
+.selector-chosen h2 {
+    background: var(--accent) !important;
+}
+</style>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+{% endblock %}
+
+{% block nav-global %}
+{% endblock %}

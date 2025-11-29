@@ -4,13 +4,30 @@ from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.shortcuts import redirect
 from django.db import models
+from django.contrib.auth.models import User, Group 
 from django.urls import reverse
+from django.core.exceptions import PermissionDenied
 from .models import Course, Lesson, Assignment, Submission, Grade, Comment, Enrollment  # Добавили Enrollment
+
+def teacher_required(view_func):
+    """Декоратор для проверки прав преподавателя"""
+    def wrapper(request, *args, **kwargs):
+        if not request.user.groups.filter(name='Teachers').exists():
+            raise PermissionDenied("Доступ только для преподавателей")
+        return view_func(request, *args, **kwargs)
+    return wrapper
 
 def home(request):
     courses = Course.objects.all()[:6]
+    total_courses = Course.objects.count()
+    total_students = User.objects.filter(groups__name='Students').count()
+    total_teachers = User.objects.filter(groups__name='Teachers').count()
+    
     context = {
-        'courses': courses
+        'courses': courses,
+        'total_courses': total_courses,
+        'total_students': total_students,
+        'total_teachers': total_teachers,
     }
     return render(request, 'index.html', context)
 
@@ -81,38 +98,58 @@ def assignment_detail(request, assignment_id):
 
 @login_required
 def submit_assignment(request, assignment_id):
-    assignment = get_object_or_404(Assignment, id=assignment_id)
-    
-    if request.method == 'POST':
-        # Проверяем, не сдавал ли уже пользователь это задание
-        existing_submission = Submission.objects.filter(
-            assignment=assignment, 
-            student=request.user
-        ).first()
+    """Сдача задания студентом"""
+    try:
+        assignment = get_object_or_404(Assignment, id=assignment_id)
         
-        if existing_submission:
-            messages.error(request, 'Вы уже сдали эту работу!')
+        if request.method == 'POST':
+            # Проверяем, не сдавал ли уже пользователь это задание
+            existing_submission = Submission.objects.filter(
+                assignment=assignment, 
+                student=request.user
+            ).first()
+            
+            if existing_submission:
+                messages.error(request, 'Вы уже сдали эту работу!')
+                return redirect('assignment_detail', assignment_id=assignment_id)
+            
+            # Получаем данные формы
+            file = request.FILES.get('file')
+            text = request.POST.get('text', '')
+            
+            # Проверяем что хотя бы что-то заполнено
+            if not file and not text.strip():
+                messages.error(request, 'Пожалуйста, загрузите файл или напишите текст ответа')
+                return redirect('assignment_detail', assignment_id=assignment_id)
+            
+            # Создаем новую сдачу
+            submission = Submission.objects.create(
+                assignment=assignment,
+                student=request.user,
+                file=file if file else None,
+                text=text
+            )
+            
+            messages.success(request, 'Работа успешно сдана на проверку!')
             return redirect('assignment_detail', assignment_id=assignment_id)
         
-        # Создаем новую сдачу
-        file = request.FILES.get('file')
-        text = request.POST.get('text', '')
-        
-        if not file:
-            messages.error(request, 'Пожалуйста, загрузите файл с работой')
-            return redirect('assignment_detail', assignment_id=assignment_id)
-        
-        submission = Submission.objects.create(
-            assignment=assignment,
-            student=request.user,
-            file=file,
-            text=text
-        )
-        
-        messages.success(request, 'Работа успешно сдана на проверку!')
+        # Если GET запрос - перенаправляем на страницу задания
         return redirect('assignment_detail', assignment_id=assignment_id)
+        
+    except Exception as e:
+        print(f"Error in submit_assignment: {e}")
+        messages.error(request, f'Ошибка при отправке работы: {str(e)}')
+        return redirect('assignment_detail', assignment_id=assignment_id)
+
+def your_view(request):
+    courses = Course.objects.all()
+    total_assignments = sum(course.assignments.count() for course in courses)
     
-    return redirect('assignment_detail', assignment_id=assignment_id)
+    context = {
+        'courses': courses,
+        'total_assignments': total_assignments,
+    }
+    return render(request, 'teacher/courses.html', context)
 
 def courses_list(request):
     search_query = request.GET.get('search', '')
@@ -268,3 +305,116 @@ def course_detail(request, course_id):
         print(f"Error in course_detail: {e}")  # Для отладки
         messages.error(request, 'Ошибка при загрузке страницы курса')
         return redirect('courses_list')
+    
+@login_required
+@teacher_required
+def teacher_dashboard(request):
+    """Дашборд преподавателя"""
+    print("DEBUG: teacher_dashboard called")  # Отладка
+    
+    # Статистика преподавателя
+    courses_taught = Course.objects.all()
+    total_students = Enrollment.objects.filter(course__in=courses_taught).values('user').distinct().count()
+    pending_submissions = Submission.objects.filter(grade__isnull=True).count()
+    graded_count = Submission.objects.filter(grade__isnull=False).count()
+    
+    # Последние сдачи на проверку
+    recent_submissions = Submission.objects.filter(grade__isnull=True).select_related(
+        'student', 'assignment', 'assignment__lesson', 'assignment__lesson__course'
+    )[:10]
+    
+    context = {
+        'courses_taught': courses_taught,
+        'total_students': total_students,
+        'pending_submissions': pending_submissions,
+        'graded_count': graded_count,
+        'recent_submissions': recent_submissions,
+        'total_courses': courses_taught.count(),
+    }
+    
+    print(f"DEBUG: Context: {context}")  # Отладка
+    return render(request, 'teacher/dashboard.html', context)
+
+@login_required
+@teacher_required
+def teacher_courses(request):
+    """Управление курсами преподавателя"""
+    courses = Course.objects.all()  # Пока все курсы
+    
+    context = {
+        'courses': courses,
+    }
+    return render(request, 'teacher/courses.html', context)
+
+@login_required
+@teacher_required
+def teacher_submissions(request):
+    """Список работ на проверку"""
+    submissions = Submission.objects.select_related(
+        'student', 'assignment', 'assignment__lesson', 'assignment__lesson__course'
+    ).order_by('-submitted_at')
+    
+    # Фильтрация
+    status_filter = request.GET.get('status', 'all')
+    if status_filter == 'pending':
+        submissions = submissions.filter(grade__isnull=True)
+    elif status_filter == 'graded':
+        submissions = submissions.filter(grade__isnull=False)
+    
+    context = {
+        'submissions': submissions,
+        'status_filter': status_filter,
+        'pending_count': Submission.objects.filter(grade__isnull=True).count(),
+        'graded_count': Submission.objects.filter(grade__isnull=False).count(),
+        'total_count': Submission.objects.count(),
+    }
+    return render(request, 'teacher/submissions.html', context)
+
+@login_required
+@teacher_required
+def grade_submission(request, submission_id):
+    """Страница оценки работы"""
+    submission = get_object_or_404(Submission, id=submission_id)
+    
+    if request.method == 'POST':
+        score = request.POST.get('score')
+        feedback = request.POST.get('feedback', '')
+        
+        if score:
+            # Удаляем старую оценку если есть
+            Grade.objects.filter(submission=submission).delete()
+            
+            # Создаем новую оценку
+            Grade.objects.create(
+                submission=submission,
+                teacher=request.user,
+                score=int(score),
+                feedback=feedback
+            )
+            
+            messages.success(request, f'Работа оценена на {score} баллов!')
+            return redirect('teacher_submissions')
+        else:
+            messages.error(request, 'Пожалуйста, укажите оценку')
+    
+    # Получаем существующую оценку если есть
+    existing_grade = Grade.objects.filter(submission=submission).first()
+    
+    context = {
+        'submission': submission,
+        'existing_grade': existing_grade,
+        'max_score': submission.assignment.max_score,
+    }
+    return render(request, 'teacher/grade_submissions.html', context)
+
+@login_required
+@teacher_required
+def teacher_admin(request):
+    """Упрощенная админка для преподавателей"""
+    context = {
+        'courses_count': Course.objects.count(),
+        'lessons_count': Lesson.objects.count(),
+        'assignments_count': Assignment.objects.count(),
+        'students_count': User.objects.filter(groups__name='Students').count(),
+    }
+    return render(request, 'teacher/admin.html', context)

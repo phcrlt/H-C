@@ -1,0 +1,212 @@
+{% extends 'base.html' %}
+
+{% block title %}Проверка работ - Преподаватель{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Заголовок -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body p-4">
+                    <div class="row align-items-center">
+                        <div class="col-md-8">
+                            <h1 class="h3 mb-2 fw-bold">
+                                <i class="fas fa-check-circle me-2 text-primary"></i>
+                                Проверка работ
+                            </h1>
+                            <p class="text-muted mb-0">Оценка студенческих работ и оставление комментариев</p>
+                        </div>
+                        <div class="col-md-4 text-end">
+                            <div class="btn-group">
+                                <a href="{% url 'teacher_dashboard' %}" class="btn btn-outline-primary">
+                                    <i class="fas fa-arrow-left me-2"></i>Назад
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Фильтры и статистика -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body">
+                    <div class="row align-items-center">
+                        <div class="col-md-6">
+                            <div class="btn-group" role="group">
+                                <a href="{% url 'teacher_submissions' %}?status=all" 
+                                   class="btn {% if status_filter == 'all' %}btn-primary{% else %}btn-outline-primary{% endif %}">
+                                    Все работы ({{ total_count }})
+                                </a>
+                                <a href="{% url 'teacher_submissions' %}?status=pending" 
+                                   class="btn {% if status_filter == 'pending' %}btn-warning{% else %}btn-outline-warning{% endif %}">
+                                    На проверке ({{ pending_count }})
+                                </a>
+                                <a href="{% url 'teacher_submissions' %}?status=graded" 
+                                   class="btn {% if status_filter == 'graded' %}btn-success{% else %}btn-outline-success{% endif %}">
+                                    Проверенные ({{ graded_count }})
+                                </a>
+                            </div>
+                        </div>
+                        <div class="col-md-6 text-end">
+                            <div class="input-group" style="max-width: 300px; margin-left: auto;">
+                                <input type="text" class="form-control" placeholder="Поиск работ...">
+                                <button class="btn btn-outline-secondary" type="button">
+                                    <i class="fas fa-search"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Список работ -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body p-0">
+                    {% if submissions %}
+                    <div class="table-responsive">
+                        <table class="table table-hover mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Студент</th>
+                                    <th>Курс / Задание</th>
+                                    <th>Дата сдачи</th>
+                                    <th>Файл</th>
+                                    <th>Оценка</th>
+                                    <th>Статус</th>
+                                    <th>Действия</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for submission in submissions %}
+                                <tr>
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            <div class="flex-shrink-0">
+                                                {% if submission.student.userprofile.avatar %}
+                                                <img src="{{ submission.student.userprofile.avatar.url }}" 
+                                                     class="rounded-circle" width="40" height="40" alt="Аватар">
+                                                {% else %}
+                                                <div class="rounded-circle bg-primary d-flex align-items-center justify-content-center" 
+                                                     style="width: 40px; height: 40px;">
+                                                    <i class="fas fa-user text-white"></i>
+                                                </div>
+                                                {% endif %}
+                                            </div>
+                                            <div class="flex-grow-1 ms-3">
+                                                <h6 class="mb-0 fw-bold">{{ submission.student.get_full_name|default:submission.student.username }}</h6>
+                                                <small class="text-muted">{{ submission.student.email }}</small>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <h6 class="mb-1 fw-bold">{{ submission.assignment.title }}</h6>
+                                        <p class="mb-0 text-muted small">
+                                            {{ submission.assignment.lesson.course.title }} → 
+                                            {{ submission.assignment.lesson.title }}
+                                        </p>
+                                        <small class="text-muted">
+                                            Макс. балл: {{ submission.assignment.max_score }}
+                                        </small>
+                                    </td>
+                                    <td>
+                                        <small class="text-muted">
+                                            {{ submission.submitted_at|date:"d.m.Y" }}<br>
+                                            <span class="text-muted">{{ submission.submitted_at|date:"H:i" }}</span>
+                                        </small>
+                                    </td>
+                                    <td>
+                                        {% if submission.file %}
+                                        <a href="{{ submission.file.url }}" class="btn btn-sm btn-outline-primary" target="_blank">
+                                            <i class="fas fa-download me-1"></i>Скачать
+                                        </a>
+                                        {% else %}
+                                        <span class="text-muted small">Нет файла</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {% if submission.grade %}
+                                        <div class="text-center">
+                                            <span class="badge bg-success fs-6">{{ submission.grade.score }}/100</span>
+                                            <small class="text-muted d-block">Оценено</small>
+                                        </div>
+                                        {% else %}
+                                        <span class="badge bg-warning text-dark">Не оценено</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {% if submission.grade %}
+                                        <span class="badge bg-success">
+                                            <i class="fas fa-check me-1"></i>Проверено
+                                        </span>
+                                        {% else %}
+                                        <span class="badge bg-warning">
+                                            <i class="fas fa-clock me-1"></i>Ожидает
+                                        </span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <div class="btn-group btn-group-sm">
+                                            <a href="{% url 'grade_submission' submission.id %}" 
+                                               class="btn {% if submission.grade %}btn-outline-success{% else %}btn-primary{% endif %}">
+                                                {% if submission.grade %}
+                                                <i class="fas fa-edit me-1"></i>Изменить
+                                                {% else %}
+                                                <i class="fas fa-check me-1"></i>Оценить
+                                                {% endif %}
+                                            </a>
+                                            {% if submission.file %}
+                                            <a href="{{ submission.file.url }}" 
+                                               class="btn btn-outline-primary" 
+                                               target="_blank"
+                                               title="Скачать работу">
+                                                <i class="fas fa-download"></i>
+                                            </a>
+                                            {% endif %}
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <div class="text-center py-5">
+                        <i class="fas fa-check-circle fa-4x text-muted mb-3"></i>
+                        <h4 class="text-muted">Работы не найдены</h4>
+                        <p class="text-muted">
+                            {% if status_filter == 'pending' %}
+                            Нет работ, ожидающих проверки
+                            {% elif status_filter == 'graded' %}
+                            Нет проверенных работ
+                            {% else %}
+                            Студенты еще не сдали работы
+                            {% endif %}
+                        </p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.table th {
+    border-top: none;
+    font-weight: 600;
+    color: #6c757d;
+}
+.table td {
+    vertical-align: middle;
+}
+</style>
+{% endblock %}

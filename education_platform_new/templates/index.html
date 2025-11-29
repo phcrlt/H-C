@@ -9,6 +9,23 @@
                 <div class="col-lg-8">
                     <h1 class="display-4 fw-bold mb-4">Добро пожаловать на образовательную платформу</h1>
                     <p class="lead mb-4">Современное решение для дистанционного обучения с интуитивно понятным интерфейсом</p>
+                    
+                    <!-- Статистика -->
+                    <div class="row mb-4">
+                        <div class="col-md-4">
+                            <h3 class="fw-bold">{{ total_courses }}+</h3>
+                            <p class="mb-0">Курсов</p>
+                        </div>
+                        <div class="col-md-4">
+                            <h3 class="fw-bold">{{ total_students }}+</h3>
+                            <p class="mb-0">Студентов</p>
+                        </div>
+                        <div class="col-md-4">
+                            <h3 class="fw-bold">{{ total_teachers }}+</h3>
+                            <p class="mb-0">Преподавателей</p>
+                        </div>
+                    </div>
+                    
                     {% if not user.is_authenticated %}
                     <div class="d-flex gap-3 justify-content-center flex-wrap">
                         <a href="/accounts/register/" class="btn btn-light btn-lg px-4">Начать обучение</a>
@@ -28,37 +45,46 @@
     <!-- Особенности платформы -->
     <div class="row mb-5">
         <div class="col-md-4 mb-4">
-            <div class="card h-100 text-center border-0 shadow-sm">
+            <a href="{% url 'courses_list' %}" class="card h-100 text-center border-0 shadow-sm text-decoration-none hover-card">
                 <div class="card-body p-4">
                     <div class="text-primary mb-3">
                         <i class="fas fa-book fa-3x"></i>
                     </div>
                     <h5 class="card-title fw-bold">Курсы</h5>
                     <p class="card-text text-muted">Доступ к разнообразным образовательным курсам и материалам</p>
+                    <div class="mt-3">
+                        <span class="btn btn-outline-primary btn-sm">Посмотреть курсы</span>
+                    </div>
                 </div>
-            </div>
+            </a>
         </div>
         <div class="col-md-4 mb-4">
-            <div class="card h-100 text-center border-0 shadow-sm">
+            <a href="{% url 'my_courses' %}" class="card h-100 text-center border-0 shadow-sm text-decoration-none hover-card">
                 <div class="card-body p-4">
                     <div class="text-success mb-3">
                         <i class="fas fa-chart-line fa-3x"></i>
                     </div>
                     <h5 class="card-title fw-bold">Прогресс</h5>
                     <p class="card-text text-muted">Отслеживайте свой прогресс обучения в реальном времени</p>
+                    <div class="mt-3">
+                        <span class="btn btn-outline-success btn-sm">Мой прогресс</span>
+                    </div>
                 </div>
-            </div>
+            </a>
         </div>
         <div class="col-md-4 mb-4">
-            <div class="card h-100 text-center border-0 shadow-sm">
+            <a href="#" class="card h-100 text-center border-0 shadow-sm text-decoration-none hover-card" onclick="showCommunityMessage()">
                 <div class="card-body p-4">
                     <div class="text-info mb-3">
                         <i class="fas fa-users fa-3x"></i>
                     </div>
                     <h5 class="card-title fw-bold">Сообщество</h5>
                     <p class="card-text text-muted">Общайтесь с преподавателями и другими студентами</p>
+                    <div class="mt-3">
+                        <span class="btn btn-outline-info btn-sm">Присоединиться</span>
+                    </div>
                 </div>
-            </div>
+            </a>
         </div>
     </div>
 
@@ -77,7 +103,7 @@
                     <div class="row">
                         {% for course in courses %}
                         <div class="col-lg-4 col-md-6 mb-4">
-                            <div class="card h-100 course-card border-0 shadow-sm">
+                            <a href="{% url 'course_detail' course.id %}" class="card h-100 course-card border-0 shadow-sm text-decoration-none hover-card">
                                 <div class="card-body">
                                     <h6 class="card-title fw-bold">{{ course.title }}</h6>
                                     <p class="card-text text-muted small">{{ course.short_description|default:course.description|truncatewords:15 }}</p>
@@ -87,11 +113,13 @@
                                         </span>
                                         <small class="text-muted">{{ course.level }}</small>
                                     </div>
-                                    <a href="/lessons/?course={{ course.id }}" class="btn btn-outline-primary btn-sm w-100">
-                                        <i class="fas fa-book-open me-1"></i>Смотреть уроки
-                                    </a>
+                                    <div class="text-center">
+                                        <span class="btn btn-outline-primary btn-sm">
+                                            <i class="fas fa-book-open me-1"></i>Подробнее
+                                        </span>
+                                    </div>
                                 </div>
-                            </div>
+                            </a>
                         </div>
                         {% endfor %}
                     </div>
@@ -277,6 +305,86 @@ document.addEventListener('DOMContentLoaded', function() {
 mark {
     background-color: #fff3cd;
     padding: 0;
+}
+</style>
+<style>
+.hover-card {
+    transition: all 0.3s ease;
+    color: inherit;
+}
+
+.hover-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 30px rgba(0,0,0,0.15) !important;
+    text-decoration: none;
+    color: inherit;
+}
+
+.hover-card .card-body {
+    transition: all 0.3s ease;
+}
+
+.hover-card:hover .card-body {
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+}
+
+.hover-card:hover .text-primary {
+    color: #0d6efd !important;
+}
+
+.hover-card:hover .text-success {
+    color: #198754 !important;
+}
+
+.hover-card:hover .text-info {
+    color: #0dcaf0 !important;
+}
+</style>
+<script>
+function showCommunityMessage() {
+    alert('Функционал сообщества будет доступен в ближайших обновлениях! 🚀\n\nСейчас вы можете:\n• Общаться с преподавателями через комментарии к заданиям\n• Задавать вопросы в личном кабинете\n• Следить за прогрессом других студентов');
+    
+    // Опционально: можно сделать плавное перенаправление на страницу с заданиями
+    // setTimeout(function() {
+    //     window.location.href = "{% url 'assignments_list' %}";
+    // }, 1000);
+}
+</script>
+<style>
+/* Улучшенные hover-эффекты */
+.hover-card {
+    border: 2px solid transparent;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.hover-card:hover {
+    border-color: rgba(13, 110, 253, 0.2);
+    transform: translateY(-8px) scale(1.02);
+}
+
+/* Эффект для карточек курсов */
+.course-card:hover {
+    border-color: rgba(13, 110, 253, 0.3);
+}
+
+/* Плавная анимация для кнопок внутри карточек */
+.hover-card .btn {
+    transition: all 0.3s ease;
+}
+
+.hover-card:hover .btn-outline-primary {
+    background-color: #0d6efd;
+    color: white;
+}
+
+.hover-card:hover .btn-outline-success {
+    background-color: #198754;
+    color: white;
+}
+
+.hover-card:hover .btn-outline-info {
+    background-color: #0dcaf0;
+    color: white;
 }
 </style>
 {% endblock %}

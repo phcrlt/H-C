@@ -1,0 +1,202 @@
+{% extends 'base.html' %}
+
+{% block title %}Панель преподавателя{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Заголовок -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body p-4">
+                    <div class="row align-items-center">
+                        <div class="col-md-8">
+                            <h1 class="h3 mb-2 fw-bold">
+                                <i class="fas fa-chalkboard-teacher me-2 text-primary"></i>
+                                Панель преподавателя
+                            </h1>
+                            <p class="text-muted mb-0">Управление курсами и проверка работ</p>
+                        </div>
+                        <div class="col-md-4 text-end">
+                            <div class="btn-group">
+                                <a href="{% url 'teacher_submissions' %}" class="btn btn-primary">
+                                    <i class="fas fa-check-circle me-2"></i>Проверить работы
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Статистика -->
+    <div class="row mb-4">
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <div class="row align-items-center">
+                        <div class="col-8">
+                            <h6 class="card-title text-muted mb-2">Мои курсы</h6>
+                            <h3 class="fw-bold text-primary">{{ total_courses }}</h3>
+                        </div>
+                        <div class="col-4 text-end">
+                            <i class="fas fa-book fa-2x text-primary opacity-25"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <div class="row align-items-center">
+                        <div class="col-8">
+                            <h6 class="card-title text-muted mb-2">Студентов</h6>
+                            <h3 class="fw-bold text-success">{{ total_students }}</h3>
+                        </div>
+                        <div class="col-4 text-end">
+                            <i class="fas fa-users fa-2x text-success opacity-25"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <div class="row align-items-center">
+                        <div class="col-8">
+                            <h6 class="card-title text-muted mb-2">На проверке</h6>
+                            <h3 class="fw-bold text-warning">{{ pending_submissions }}</h3>
+                        </div>
+                        <div class="col-4 text-end">
+                            <i class="fas fa-clock fa-2x text-warning opacity-25"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <div class="row align-items-center">
+                        <div class="col-8">
+                            <h6 class="card-title text-muted mb-2">Проверено</h6>
+                            <h3 class="fw-bold text-info">
+                                {{ graded_count }}
+                            </h3>
+                        </div>
+                        <div class="col-4 text-end">
+                            <i class="fas fa-check-circle fa-2x text-info opacity-25"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Последние работы на проверку -->
+        <div class="col-lg-8 mb-4">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-header bg-white">
+                    <h5 class="mb-0 fw-bold">
+                        <i class="fas fa-clock me-2 text-warning"></i>
+                        Последние работы на проверку
+                    </h5>
+                </div>
+                <div class="card-body">
+                    {% if recent_submissions %}
+                    <div class="list-group list-group-flush">
+                        {% for submission in recent_submissions %}
+                        <div class="list-group-item d-flex justify-content-between align-items-center">
+                            <div class="flex-grow-1">
+                                <h6 class="mb-1 fw-bold">{{ submission.assignment.title }}</h6>
+                                <p class="mb-1 text-muted small">
+                                    {{ submission.assignment.lesson.course.title }} → 
+                                    {{ submission.assignment.lesson.title }}
+                                </p>
+                                <small class="text-muted">
+                                    <i class="fas fa-user me-1"></i>{{ submission.student.get_full_name|default:submission.student.username }}
+                                    • 
+                                    <i class="fas fa-calendar me-1"></i>{{ submission.submitted_at|date:"d.m.Y H:i" }}
+                                </small>
+                            </div>
+                            <div class="ms-3">
+                                <a href="{% url 'grade_submission' submission.id %}" class="btn btn-primary btn-sm">
+                                    <i class="fas fa-check me-1"></i>Оценить
+                                </a>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <div class="text-center py-4">
+                        <i class="fas fa-check-circle fa-3x text-muted mb-3"></i>
+                        <h5 class="text-muted">Нет работ на проверку</h5>
+                        <p class="text-muted">Все работы проверены!</p>
+                    </div>
+                    {% endif %}
+                </div>
+                <div class="card-footer bg-white">
+                    <a href="{% url 'teacher_submissions' %}" class="btn btn-outline-primary btn-sm">
+                        <i class="fas fa-list me-1"></i>Все работы
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Быстрые действия -->
+        <div class="col-lg-4 mb-4">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-header bg-white">
+                    <h5 class="mb-0 fw-bold">
+                        <i class="fas fa-bolt me-2 text-success"></i>
+                        Быстрые действия
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="d-grid gap-2">
+                        <a href="{% url 'teacher_submissions' %}?status=pending" class="btn btn-warning text-dark">
+                            <i class="fas fa-clock me-2"></i>Работы на проверку ({{ pending_submissions }})
+                        </a>
+                        <a href="{% url 'teacher_courses' %}" class="btn btn-outline-primary">
+                            <i class="fas fa-book me-2"></i>Мои курсы
+                        </a>
+                        <a href="/admin/core/course/add/" class="btn btn-outline-success">
+                            <i class="fas fa-plus me-2"></i>Создать курс
+                        </a>
+                        <a href="/admin/core/lesson/add/" class="btn btn-outline-info">
+                            <i class="fas fa-file-alt me-2"></i>Добавить урок
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.card {
+    border-radius: 12px;
+    transition: transform 0.2s ease;
+}
+.card:hover {
+    transform: translateY(-2px);
+}
+.list-group-item {
+    border: none;
+    padding: 1rem 0;
+}
+.list-group-item:first-child {
+    padding-top: 0;
+}
+.list-group-item:last-child {
+    padding-bottom: 0;
+}
+</style>
+{% endblock %}

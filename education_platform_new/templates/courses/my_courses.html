@@ -1,68 +1,165 @@
 {% extends 'base.html' %}
 
 {% block content %}
-<div class="container mt-4">
-    <!-- Сообщения -->
-    {% if messages %}
-        {% for message in messages %}
-            <div class="alert alert-{{ message.tags }} alert-dismissible fade show">
-                {{ message }}
-                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+<div class="container">
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body p-4">
+                    <div class="row align-items-center">
+                        <div class="col-md-8">
+                            <h1 class="h3 mb-2 fw-bold">Мои курсы</h1>
+                            <p class="text-muted mb-0">
+                                Всего курсов: <strong>{{ total_courses }}</strong> | 
+                                Активных: <strong>{{ active_courses|length }}</strong> | 
+                                Завершенных: <strong>{{ completed_courses|length }}</strong>
+                            </p>
+                        </div>
+                        <div class="col-md-4 text-end">
+                            <a href="{% url 'courses_list' %}" class="btn btn-primary">
+                                <i class="fas fa-plus me-2"></i>Найти новые курсы
+                            </a>
+                        </div>
+                    </div>
+                </div>
             </div>
-        {% endfor %}
-    {% endif %}
-
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <h1>Мои курсы</h1>
-        <a href="{% url 'courses_list' %}" class="btn btn-primary">
-            Найти новые курсы
-        </a>
-    </div>
-
-    <!-- Отладочная информация -->
-    <div class="alert alert-info">
-        <strong>Отладка:</strong> 
-        Всего курсов: {{ total_courses }}, 
-        Активных: {{ active_courses|length }}, 
-        Завершенных: {{ completed_courses|length }}
+        </div>
     </div>
 
     <!-- Активные курсы -->
+    <!-- Активные курсы -->
     {% if active_courses %}
-    <div class="card mb-4">
-        <div class="card-header">
-            <h3>Активные курсы ({{ active_courses|length }})</h3>
-        </div>
-        <div class="card-body">
+    <div class="row mb-5">
+        <div class="col-12">
+            <h3 class="h4 mb-3 fw-bold">Активные курсы</h3>
             <div class="row">
                 {% for enrollment in active_courses %}
-                <div class="col-md-6 mb-3">
-                    <div class="card">
+                <div class="col-xl-4 col-lg-6 col-md-6 mb-4">
+                    <div class="card h-100 border-0 shadow-sm hover-shadow">
+                        {% if enrollment.course.image %}
+                        <img src="{{ enrollment.course.image.url }}" class="card-img-top" alt="{{ enrollment.course.title }}" style="height: 200px; object-fit: cover;">
+                        {% else %}
+                        <div class="card-img-top bg-light d-flex align-items-center justify-content-center" style="height: 200px;">
+                            <i class="fas fa-book fa-3x text-muted"></i>
+                        </div>
+                        {% endif %}
+                        
                         <div class="card-body">
-                            <h5>{{ enrollment.course.title }}</h5>
-                            <p class="text-muted">{{ enrollment.course.short_description }}</p>
+                            <h5 class="card-title fw-bold">{{ enrollment.course.title }}</h5>
+                            <p class="card-text text-muted small">{{ enrollment.course.short_description }}</p>
                             
-                            <div class="mb-2">
-                                <span class="badge bg-primary">{{ enrollment.course.get_level_display }}</span>
-                                {% if enrollment.course.is_free %}
-                                <span class="badge bg-success">Бесплатный</span>
-                                {% else %}
-                                <span class="badge bg-warning">Премиум</span>
-                                {% endif %}
-                            </div>
-                            
-                            <div class="mb-2">
-                                <small class="text-muted">
-                                    Записан: {{ enrollment.enrolled_at|date:"d.m.Y" }}
+                            <!-- Прогресс -->
+                            <div class="mb-3">
+                                <div class="d-flex justify-content-between align-items-center mb-1">
+                                    <small class="text-muted">Прогресс</small>
+                                    <small class="text-muted">{{ enrollment.progress_percentage }}%</small>
+                                </div>
+                                <div class="progress" style="height: 6px;">
+                                    <div class="progress-bar" 
+                                        data-progress="{{ enrollment.progress_percentage|default:0 }}"
+                                        role="progressbar"></div>
+
+                                    <script>
+                                    document.addEventListener('DOMContentLoaded', function() {
+                                        document.querySelectorAll('.progress-bar').forEach(function(bar) {
+                                            var progress = bar.getAttribute('data-progress');
+                                            bar.style.width = progress + '%';
+                                        });
+                                    });
+                                    </script>
+                                </div>
+                                <small class="text-muted d-block mt-1">
+                                    {{ enrollment.completed_lessons_count }}/{{ enrollment.total_lessons_count }} уроков завершено
                                 </small>
                             </div>
                             
-                            <div class="d-flex gap-2">
-                                <a href="{% url 'course_detail' enrollment.course.id %}" class="btn btn-sm btn-outline-primary">
-                                    Подробнее
+                            <div class="d-flex justify-content-between align-items-center">
+                                <span class="badge {% if enrollment.course.level == 'beginner' %}bg-success{% elif enrollment.course.level == 'intermediate' %}bg-warning text-dark{% else %}bg-danger{% endif %}">
+                                    {{ enrollment.course.get_level_display }}
+                                </span>
+                                <small class="text-muted">
+                                    <i class="fas fa-calendar me-1"></i>
+                                    {{ enrollment.enrolled_at|date:"d.m.Y" }}
+                                </small>
+                            </div>
+                        </div>
+                        
+                        <div class="card-footer bg-transparent border-0 pb-3">
+                            <div class="d-grid gap-2">
+                                <a href="{% url 'lessons_list' %}?course={{ enrollment.course.id }}" class="btn btn-primary btn-sm">
+                                    <i class="fas fa-play me-1"></i>
+                                    {% if enrollment.progress_percentage == 0 %}
+                                        Начать обучение
+                                    {% else %}
+                                        Продолжить ({{ enrollment.progress_percentage }}%)
+                                    {% endif %}
                                 </a>
-                                <a href="{% url 'lessons_list' %}?course={{ enrollment.course.id }}" class="btn btn-sm btn-success">
-                                    Учиться ✅
+                                <div class="d-flex gap-1">
+                                    <a href="{% url 'course_detail' enrollment.course.id %}" class="btn btn-outline-secondary btn-sm flex-fill">
+                                        <i class="fas fa-info-circle me-1"></i>Подробнее
+                                    </a>
+                                    <a href="{% url 'unenroll_course' enrollment.course.id %}" 
+                                    class="btn btn-outline-danger btn-sm"
+                                    onclick="return confirm('Вы уверены, что хотите отписаться от курса &quot;{{ enrollment.course.title }}&quot;?')"
+                                    title="Отписаться от курса">
+                                        <i class="fas fa-times"></i>
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Завершенные курсы -->
+    {% if completed_courses %}
+    <div class="row mb-4">
+        <div class="col-12">
+            <h3 class="h4 mb-3 fw-bold">Завершенные курсы</h3>
+            <div class="row">
+                {% for enrollment in completed_courses %}
+                <div class="col-lg-4 col-md-6 mb-4">
+                    <div class="card h-100 border-0 shadow-sm completed-course">
+                        {% if enrollment.course.image %}
+                        <img src="{{ enrollment.course.image.url }}" class="card-img-top" alt="{{ enrollment.course.title }}" style="height: 150px; object-fit: cover;">
+                        {% else %}
+                        <div class="card-img-top bg-light d-flex align-items-center justify-content-center" style="height: 150px;">
+                            <i class="fas fa-book fa-2x text-muted"></i>
+                        </div>
+                        {% endif %}
+                        
+                        <div class="card-body text-center">
+                            <div class="mb-3">
+                                <i class="fas fa-trophy fa-2x text-warning"></i>
+                            </div>
+                            <h6 class="card-title fw-bold">{{ enrollment.course.title }}</h6>
+                            
+                            <div class="mb-3">
+                                <span class="badge bg-success">
+                                    <i class="fas fa-check me-1"></i>Завершен
+                                </span>
+                            </div>
+                            
+                            <div class="progress mb-2" style="height: 8px;">
+                                <div class="progress-bar bg-success" style="width: 100%"></div>
+                            </div>
+                            
+                            <small class="text-muted d-block">
+                                Завершен: {{ enrollment.completed_at|date:"d.m.Y" }}
+                            </small>
+                            <small class="text-muted">
+                                {{ enrollment.total_lessons_count }} уроков
+                            </small>
+                        </div>
+                        
+                        <div class="card-footer bg-transparent border-0">
+                            <div class="d-grid gap-2">
+                                <a href="{% url 'course_detail' enrollment.course.id %}" class="btn btn-outline-primary btn-sm">
+                                    <i class="fas fa-redo me-1"></i>Повторить
                                 </a>
                             </div>
                         </div>
@@ -76,16 +173,147 @@
 
     <!-- Если нет курсов -->
     {% if not active_courses and not completed_courses %}
-    <div class="card">
-        <div class="card-body text-center py-5">
-            <i class="fas fa-book fa-4x text-muted mb-3"></i>
-            <h3 class="text-muted">У вас пока нет курсов</h3>
-            <p class="text-muted mb-4">Найдите интересные курсы и начните обучение</p>
-            <a href="{% url 'courses_list' %}" class="btn btn-primary btn-lg">
-                Найти курсы
-            </a>
+    <div class="row">
+        <div class="col-12">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body text-center py-5">
+                    <i class="fas fa-book-open fa-4x text-muted mb-4"></i>
+                    <h3 class="text-muted">У вас пока нет курсов</h3>
+                    <p class="text-muted mb-4">Найдите интересные курсы и начните обучение</p>
+                    <div class="d-flex gap-3 justify-content-center flex-wrap">
+                        <a href="{% url 'courses_list' %}" class="btn btn-primary btn-lg">
+                            <i class="fas fa-search me-2"></i>Найти курсы
+                        </a>
+                        <a href="{% url 'courses_list' %}?level=beginner" class="btn btn-outline-primary btn-lg">
+                            <i class="fas fa-star me-2"></i>Курсы для начинающих
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Статистика обучения -->
+    {% if active_courses or completed_courses %}
+    <div class="row mt-5">
+        <div class="col-12">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-white">
+                    <h5 class="mb-0 fw-bold"><i class="fas fa-chart-line me-2"></i>Общая статистика</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row text-center">
+                        <div class="col-md-2 col-6 mb-3">
+                            <div class="card bg-primary text-white">
+                                <div class="card-body py-3">
+                                    <h4 class="mb-1">{{ total_courses }}</h4>
+                                    <small>Всего курсов</small>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-2 col-6 mb-3">
+                            <div class="card bg-success text-white">
+                                <div class="card-body py-3">
+                                    <h4 class="mb-1">{{ completed_courses|length }}</h4>
+                                    <small>Завершено</small>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-2 col-6 mb-3">
+                            <div class="card bg-info text-white">
+                                <div class="card-body py-3">
+                                    <h4 class="mb-1">
+                                        {% with total_lessons=0 %}
+                                            {% for enrollment in active_courses %}
+                                                {% widthratio enrollment.total_lessons_count 1 1 as lessons %}
+                                                {{ total_lessons|add:lessons }}
+                                            {% endfor %}
+                                        {% endwith %}
+                                    </h4>
+                                    <small>Всего уроков</small>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-2 col-6 mb-3">
+                            <div class="card bg-warning text-white">
+                                <div class="card-body py-3">
+                                    <h4 class="mb-1">
+                                        {% with completed=0 %}
+                                            {% for enrollment in active_courses %}
+                                                {% widthratio enrollment.completed_lessons_count 1 1 as lessons %}
+                                                {{ completed|add:lessons }}
+                                            {% endfor %}
+                                        {% endwith %}
+                                    </h4>
+                                    <small>Пройдено уроков</small>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-2 col-6 mb-3">
+                            <div class="card bg-danger text-white">
+                                <div class="card-body py-3">
+                                    <h4 class="mb-1">
+                                        {% if active_courses %}
+                                            {% with total=0 %}
+                                                {% for enrollment in active_courses %}
+                                                    {{ total|add:enrollment.progress_percentage }}
+                                                {% endfor %}
+                                            {% endwith %}
+                                        {% else %}
+                                            0
+                                        {% endif %}%
+                                    </h4>
+                                    <small>Средний прогресс</small>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-2 col-6 mb-3">
+                            <div class="card bg-dark text-white">
+                                <div class="card-body py-3">
+                                    <h4 class="mb-1">
+                                        {% if completed_courses %}
+                                            {{ completed_courses|length }}
+                                        {% else %}
+                                            0
+                                        {% endif %}
+                                    </h4>
+                                    <small>Сертификатов</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
     {% endif %}
 </div>
+
+<style>
+.hover-shadow {
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+.hover-shadow:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(0,0,0,0.15) !important;
+}
+.completed-course {
+    opacity: 0.9;
+    border: 2px solid #e9ecef !important;
+}
+.completed-course:hover {
+    opacity: 1;
+    border-color: #28a745 !important;
+}
+.progress {
+    border-radius: 10px;
+}
+.progress-bar {
+    border-radius: 10px;
+}
+.card {
+    border-radius: 12px;
+}
+</style>
 {% endblock %}

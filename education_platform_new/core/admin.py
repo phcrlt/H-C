@@ -1,132 +1,82 @@
 from django.contrib import admin
-from .models import Course, Lesson, Assignment, Submission, Grade, Comment
+from .models import Course, Lesson, Assignment, Submission, Grade, Comment, Enrollment
 
 @admin.register(Course)
 class CourseAdmin(admin.ModelAdmin):
-    list_display = ['title', 'level', 'is_free', 'price', 'created_at']
+    list_display = ['title', 'level', 'is_free', 'duration', 'created_at', 'enrollments_count']
     list_filter = ['level', 'is_free', 'created_at']
     search_fields = ['title', 'description']
     readonly_fields = ['created_at', 'updated_at']
+    fieldsets = (
+        ('Основная информация', {
+            'fields': ('title', 'short_description', 'description', 'image')
+        }),
+        ('Детали', {
+            'fields': ('level', 'duration', 'price', 'is_free')
+        }),
+        ('Даты', {
+            'fields': ('created_at', 'updated_at'),
+            'classes': ('collapse',)
+        }),
+    )
+    
+    def enrollments_count(self, obj):
+        return obj.enrollments.count()
+    enrollments_count.short_description = 'Записей'
 
 @admin.register(Lesson)
 class LessonAdmin(admin.ModelAdmin):
-    list_display = ['title', 'course', 'order', 'duration']
-    list_filter = ['course']
+    list_display = ['title', 'course', 'order', 'duration', 'assignments_count']
+    list_filter = ['course']  # УБРАЛ 'created_at' - его нет в модели
     search_fields = ['title', 'content']
     ordering = ['course', 'order']
+    
+    def assignments_count(self, obj):
+        return obj.assignments.count()
+    assignments_count.short_description = 'Заданий'
 
 @admin.register(Assignment)
 class AssignmentAdmin(admin.ModelAdmin):
-    list_display = ['title', 'lesson', 'max_score', 'deadline', 'created_at']
+    list_display = ['title', 'lesson', 'max_score', 'deadline', 'submissions_count']
     list_filter = ['lesson__course', 'created_at']
     search_fields = ['title', 'description']
-    readonly_fields = ['created_at', 'updated_at']
+    
+    def submissions_count(self, obj):
+        return obj.submissions.count()
+    submissions_count.short_description = 'Сдач'
 
 @admin.register(Submission)
 class SubmissionAdmin(admin.ModelAdmin):
-    list_display = ['assignment', 'student', 'submitted_at', 'has_grade']
+    list_display = ['student', 'assignment', 'submitted_at', 'has_grade', 'grade_score']
     list_filter = ['assignment__lesson__course', 'submitted_at']
     search_fields = ['student__username', 'assignment__title']
     readonly_fields = ['submitted_at']
     
     def has_grade(self, obj):
-        return hasattr(obj, 'grade')
+        return obj.grade is not None
+    has_grade.short_description = 'Оценено'
     has_grade.boolean = True
-    has_grade.short_description = 'Оценка'
+    
+    def grade_score(self, obj):
+        return obj.grade.score if obj.grade else '-'
+    grade_score.short_description = 'Оценка'
 
 @admin.register(Grade)
 class GradeAdmin(admin.ModelAdmin):
     list_display = ['submission', 'teacher', 'score', 'graded_at']
     list_filter = ['teacher', 'graded_at']
-    search_fields = ['submission__student__username', 'teacher__username']
+    search_fields = ['submission__student__username', 'feedback']
     readonly_fields = ['graded_at']
 
 @admin.register(Comment)
 class CommentAdmin(admin.ModelAdmin):
-    list_display = ['author', 'submission', 'created_at', 'is_teacher_comment']
+    list_display = ['author', 'submission', 'is_teacher_comment', 'created_at']
     list_filter = ['is_teacher_comment', 'created_at']
     search_fields = ['author__username', 'text']
-    readonly_fields = ['created_at']
 
-# Создадим тестовые данные автоматически
-def create_test_data():
-    # Проверяем, есть ли уже курсы
-    if not Course.objects.exists():
-        print("Создаем тестовые данные...")
-        
-        # Создаем курсы
-        python_course = Course.objects.create(
-            title="Python для начинающих",
-            short_description="Основы программирования на Python",
-            description="Полный курс по основам программирования на Python для начинающих. Изучите синтаксис, структуры данных и основы ООП.",
-            duration="6 недель",
-            level="beginner",
-            is_free=True,
-            price=0
-        )
-        
-        django_course = Course.objects.create(
-            title="Веб-разработка на Django",
-            short_description="Создание веб-приложений с Django",
-            description="Научитесь создавать современные веб-приложения с использованием Django. REST API, аутентификация, базы данных.",
-            duration="8 недель",
-            level="intermediate", 
-            is_free=False,
-            price=2990
-        )
-        
-        # Создаем уроки для Python курса
-        lesson1 = Lesson.objects.create(
-            course=python_course,
-            title="Введение в Python",
-            content="Основы синтаксиса Python, переменные, типы данных.",
-            order=1,
-            duration=45
-        )
-        
-        lesson2 = Lesson.objects.create(
-            course=python_course,
-            title="Функции и модули", 
-            content="Создание функций, импорт модулей, работа с аргументами.",
-            order=2,
-            duration=60
-        )
-        
-        # Создаем уроки для Django курса
-        lesson3 = Lesson.objects.create(
-            course=django_course,
-            title="Знакомство с Django",
-            content="Установка Django, создание первого проекта, структура приложения.",
-            order=1,
-            duration=60
-        )
-        
-        # Создаем задания
-        assignment1 = Assignment.objects.create(
-            lesson=lesson1,
-            title="Первая программа на Python",
-            description="Напишите программу, которая выводит 'Hello, World!' и выполняет базовые арифметические операции.",
-            max_score=100
-        )
-        
-        assignment2 = Assignment.objects.create(
-            lesson=lesson2,
-            title="Калькулятор функций",
-            description="Создайте калькулятор с использованием функций для основных математических операций.",
-            max_score=100
-        )
-        
-        assignment3 = Assignment.objects.create(
-            lesson=lesson3, 
-            title="Первое Django приложение",
-            description="Создайте простое Django приложение с одной страницей и базовой маршрутизацией.",
-            max_score=100
-        )
-        
-        print("Тестовые данные созданы!")
-        print(f"- Курсы: {Course.objects.count()}")
-        print(f"- Уроки: {Lesson.objects.count()}")
-        print(f"- Задания: {Assignment.objects.count()}")
-
-# Вызываем создание тестовых данных при запуске
-create_test_data()
+@admin.register(Enrollment)
+class EnrollmentAdmin(admin.ModelAdmin):
+    list_display = ['user', 'course', 'enrolled_at', 'completed', 'completed_at']
+    list_filter = ['course', 'completed', 'enrolled_at']
+    search_fields = ['user__username', 'course__title']
+    readonly_fields = ['enrolled_at']

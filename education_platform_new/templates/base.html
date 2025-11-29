@@ -9,7 +9,7 @@
     <link href="/static/css/base.css" rel="stylesheet">
 </head>
 <body>
-    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+<nav class="navbar navbar-expand-lg navbar-dark bg-primary">
     <div class="container">
         <a class="navbar-brand" href="/">
             <i class="fas fa-graduation-cap me-2"></i>Образовательная платформа
@@ -28,7 +28,7 @@
                     <a class="nav-link" href="/courses/">Курсы</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="/my-courses/">Мои курсы</a>  <!-- ДОБАВИТЬ -->
+                    <a class="nav-link" href="/my-courses/">Мои курсы</a>
                 </li>
                 <li class="nav-item">
                     <a class="nav-link" href="/lessons/">Уроки</a>
@@ -36,6 +36,44 @@
                 <li class="nav-item">
                     <a class="nav-link" href="/assignments/">Задания</a>
                 </li>
+                
+                <!-- Меню преподавателя -->
+                {% if user.is_authenticated and user.groups.all %}
+                    {% for group in user.groups.all %}
+                        {% if group.name == 'Teachers' %}
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+                                <i class="fas fa-chalkboard-teacher me-1"></i>Преподаватель
+                            </a>
+                            <ul class="dropdown-menu">
+                                <li>
+                                    <a class="dropdown-item" href="{% url 'teacher_dashboard' %}">
+                                        <i class="fas fa-tachometer-alt me-2"></i>Панель управления
+                                    </a>
+                                </li>
+                                <li>
+                                    <a class="dropdown-item" href="{% url 'teacher_courses' %}">
+                                        <i class="fas fa-book me-2"></i>Мои курсы
+                                    </a>
+                                </li>
+                                <li>
+                                    <a class="dropdown-item" href="{% url 'teacher_submissions' %}">
+                                        <i class="fas fa-check-circle me-2"></i>Проверка работ
+                                    </a>
+                                </li>
+                                {% if user.is_staff %}
+                                <li><hr class="dropdown-divider"></li>
+                                <li>
+                                    <a class="dropdown-item" href="/admin/">
+                                        <i class="fas fa-cog me-2"></i>Админ-панель
+                                    </a>
+                                </li>
+                                {% endif %}
+                            </ul>
+                        </li>
+                        {% endif %}
+                    {% endfor %}
+                {% endif %}
             </ul>
             
             <ul class="navbar-nav">
