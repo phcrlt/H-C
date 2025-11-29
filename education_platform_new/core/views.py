@@ -1,10 +1,11 @@
 from django.shortcuts import render, get_object_or_404
-from django.http import JsonResponse
-from django.db import models 
+from django.http import JsonResponse, HttpResponseRedirect
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.shortcuts import redirect
-from .models import Course, Lesson, Assignment, Submission, Grade, Comment
+from django.db import models
+from django.urls import reverse
+from .models import Course, Lesson, Assignment, Submission, Grade, Comment, Enrollment  # Добавили Enrollment
 
 def home(request):
     courses = Course.objects.all()[:6]
@@ -179,3 +180,91 @@ def courses_list(request):
         'level_counts': level_counts,
     }
     return render(request, 'courses/courses_list.html', context)
+
+@login_required
+def enroll_course(request, course_id):
+    """Запись пользователя на курс"""
+    try:
+        course = get_object_or_404(Course, id=course_id)
+        
+        # Проверяем, не записан ли уже пользователь
+        existing_enrollment = Enrollment.objects.filter(user=request.user, course=course).first()
+        
+        if existing_enrollment:
+            messages.info(request, f'Вы уже записаны на курс "{course.title}"')
+        else:
+            # Создаем запись
+            Enrollment.objects.create(user=request.user, course=course)
+            messages.success(request, f'Вы успешно записались на курс "{course.title}"!')
+        
+        return redirect('course_detail', course_id=course_id)
+    except Exception as e:
+        print(f"Error in enroll_course: {e}")  # Для отладки
+        messages.error(request, 'Ошибка при записи на курс')
+        return redirect('courses_list')
+
+@login_required
+def unenroll_course(request, course_id):
+    """Отмена записи на курс"""
+    try:
+        course = get_object_or_404(Course, id=course_id)
+        enrollment = Enrollment.objects.filter(user=request.user, course=course).first()
+        
+        if enrollment:
+            enrollment.delete()
+            messages.success(request, f'Вы отписались от курса "{course.title}"')
+        else:
+            messages.error(request, 'Вы не были записаны на этот курс')
+        
+        return redirect('courses_list')
+    except Exception as e:
+        print(f"Error in unenroll_course: {e}")  # Для отладки
+        messages.error(request, 'Ошибка при отписке от курса')
+        return redirect('courses_list')
+
+@login_required
+def my_courses(request):
+    """Страница 'Мои курсы' пользователя"""
+    try:
+        enrollments = Enrollment.objects.filter(user=request.user).select_related('course')
+        
+        # Группируем по статусу
+        active_courses = [e for e in enrollments if not e.completed]
+        completed_courses = [e for e in enrollments if e.completed]
+        
+        context = {
+            'active_courses': active_courses,
+            'completed_courses': completed_courses,
+            'total_courses': enrollments.count(),
+        }
+        return render(request, 'courses/my_courses.html', context)
+    except Exception as e:
+        print(f"Error in my_courses: {e}")  # Для отладки
+        messages.error(request, 'Ошибка при загрузке ваших курсов')
+        return redirect('home')
+
+def course_detail(request, course_id):
+    """Детальная страница курса с информацией о записи"""
+    try:
+        course = get_object_or_404(Course, id=course_id)
+        lessons = course.lessons.all()
+        
+        # Проверяем записан ли пользователь на курс
+        is_enrolled = False
+        user_enrollment = None
+        
+        if request.user.is_authenticated:
+            user_enrollment = Enrollment.objects.filter(user=request.user, course=course).first()
+            is_enrolled = user_enrollment is not None
+        
+        context = {
+            'course': course,
+            'lessons': lessons,
+            'is_enrolled': is_enrolled,
+            'user_enrollment': user_enrollment,
+        }
+        return render(request, 'courses/course_detail.html', context)
+    except Exception as e:
+        print(f"Error in course_detail: {e}")  # Для отладки
+        messages.error(request, 'Ошибка при загрузке страницы курса')
+        return redirect('courses_list')

@@ -6,7 +6,9 @@ from .serializers import (
     CourseSerializer, LessonSerializer, AssignmentSerializer,
     SubmissionSerializer, GradeSerializer, CommentSerializer
 )
-
+from rest_framework.decorators import api_view
+from rest_framework.response import Response
+from django.db import models 
 class CourseViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = Course.objects.all()
     serializer_class = CourseSerializer
@@ -90,3 +92,27 @@ class GradeViewSet(viewsets.ReadOnlyModelViewSet):
     
     # Определяем базовый queryset для роутера
     queryset = Grade.objects.all()
+    
+@api_view(['GET'])
+def course_autocomplete(request):
+    query = request.GET.get('q', '')
+    if len(query) < 2:
+        return Response([])
+    
+    courses = Course.objects.filter(
+        models.Q(title__icontains=query) |
+        models.Q(short_description__icontains=query)
+    )[:10]  # Ограничиваем 10 результатами
+    
+    suggestions = [
+        {
+            'id': course.id,
+            'title': course.title,
+            'short_description': course.short_description,
+            'level': course.get_level_display(),
+            'is_free': course.is_free
+        }
+        for course in courses
+    ]
+    
+    return Response(suggestions)

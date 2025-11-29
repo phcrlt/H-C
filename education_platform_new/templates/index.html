@@ -123,4 +123,160 @@
         </div>
     </div>
 </div>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const searchInput = document.querySelector('input[name="search"]');
+    const searchForm = document.querySelector('form[method="get"]');
+    let autocompleteResults = null;
+    
+    // Создаем контейнер для результатов автодополнения
+    function createAutocompleteContainer() {
+        const container = document.createElement('div');
+        container.className = 'autocomplete-results position-absolute w-100';
+        container.style.cssText = 'z-index: 1000; background: white; border: 1px solid #ddd; border-radius: 0.375rem; max-height: 300px; overflow-y: auto; display: none;';
+        return container;
+    }
+    
+    // Инициализация автодополнения
+    function initAutocomplete() {
+        const inputGroup = searchInput.closest('.input-group');
+        inputGroup.style.position = 'relative';
+        
+        if (!autocompleteResults) {
+            autocompleteResults = createAutocompleteContainer();
+            inputGroup.appendChild(autocompleteResults);
+        }
+        
+        // Обработчик ввода
+        let timeoutId;
+        searchInput.addEventListener('input', function(e) {
+            clearTimeout(timeoutId);
+            const query = e.target.value.trim();
+            
+            if (query.length < 2) {
+                hideAutocomplete();
+                return;
+            }
+            
+            timeoutId = setTimeout(() => {
+                fetchAutocompleteResults(query);
+            }, 300);
+        });
+        
+        // Обработчик клика вне поля
+        document.addEventListener('click', function(e) {
+            if (!inputGroup.contains(e.target)) {
+                hideAutocomplete();
+            }
+        });
+        
+        // Обработчик клавиш
+        searchInput.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                hideAutocomplete();
+            }
+        });
+    }
+    
+    // Запрос к API для автодополнения
+    function fetchAutocompleteResults(query) {
+        fetch(`/api/core/course-autocomplete/?q=${encodeURIComponent(query)}`)
+            .then(response => response.json())
+            .then(data => {
+                showAutocompleteResults(data, query);
+            })
+            .catch(error => {
+                console.error('Error fetching autocomplete:', error);
+                hideAutocomplete();
+            });
+    }
+    
+    // Показать результаты автодополнения
+    function showAutocompleteResults(results, query) {
+        if (!results || results.length === 0) {
+            hideAutocomplete();
+            return;
+        }
+        
+        const html = results.map(course => `
+            <div class="autocomplete-item p-3 border-bottom" 
+                 style="cursor: pointer;"
+                 data-course-id="${course.id}"
+                 data-course-title="${course.title}">
+                <div class="d-flex justify-content-between align-items-start">
+                    <div class="flex-grow-1">
+                        <h6 class="mb-1 fw-bold">${highlightText(course.title, query)}</h6>
+                        <p class="mb-1 text-muted small">${course.short_description || ''}</p>
+                        <div class="d-flex gap-2">
+                            <span class="badge ${course.is_free ? 'bg-success' : 'bg-warning'} small">
+                                ${course.is_free ? 'Бесплатно' : 'Премиум'}
+                            </span>
+                            <span class="badge bg-secondary small">${course.level}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `).join('');
+        
+        autocompleteResults.innerHTML = html;
+        autocompleteResults.style.display = 'block';
+        
+        // Добавляем обработчики клика на элементы
+        const items = autocompleteResults.querySelectorAll('.autocomplete-item');
+        items.forEach(item => {
+            item.addEventListener('click', function() {
+                const title = this.getAttribute('data-course-title');
+                searchInput.value = title;
+                hideAutocomplete();
+                searchForm.submit();
+            });
+            
+            item.addEventListener('mouseenter', function() {
+                this.style.backgroundColor = '#f8f9fa';
+            });
+            
+            item.addEventListener('mouseleave', function() {
+                this.style.backgroundColor = '';
+            });
+        });
+    }
+    
+    // Скрыть автодополнение
+    function hideAutocomplete() {
+        if (autocompleteResults) {
+            autocompleteResults.style.display = 'none';
+        }
+    }
+    
+    // Подсветка текста в результатах
+    function highlightText(text, query) {
+        if (!query) return text;
+        const regex = new RegExp(`(${query})`, 'gi');
+        return text.replace(regex, '<mark>$1</mark>');
+    }
+    
+    // Инициализируем автодополнение
+    initAutocomplete();
+});
+</script>
+
+<style>
+.autocomplete-results {
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    margin-top: 2px;
+}
+
+.autocomplete-item:hover {
+    background-color: #f8f9fa !important;
+}
+
+.autocomplete-item:last-child {
+    border-bottom: none !important;
+}
+
+mark {
+    background-color: #fff3cd;
+    padding: 0;
+}
+</style>
 {% endblock %}

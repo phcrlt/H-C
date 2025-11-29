@@ -107,3 +107,58 @@ class Comment(models.Model):
     
     def __str__(self):
         return f"{self.author.username} - {self.text[:50]}"    
+    
+class Enrollment(models.Model):
+    """Модель для записи пользователя на курс"""
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='enrollments')
+    course = models.ForeignKey(Course, on_delete=models.CASCADE, related_name='enrollments')
+    enrolled_at = models.DateTimeField(auto_now_add=True, verbose_name='Дата записи')
+    completed = models.BooleanField(default=False, verbose_name='Завершен')
+    completed_at = models.DateTimeField(null=True, blank=True, verbose_name='Дата завершения')
+    
+    class Meta:
+        verbose_name = 'Запись на курс'
+        verbose_name_plural = 'Записи на курсы'
+        unique_together = ['user', 'course']  # Один пользователь может записаться на курс только один раз
+    
+    def __str__(self):
+        status = "завершен" if self.completed else "активен"
+        return f"{self.user.username} - {self.course.title} ({status})"
+    
+    def progress_percentage(self):
+        """Рассчитывает процент завершения курса"""
+        total_lessons = self.course.lessons.count()
+        if total_lessons == 0:
+            return 0
+        
+        # Здесь позже добавим логику подсчета пройденных уроков
+        completed_lessons = 0
+        return int((completed_lessons / total_lessons) * 100)
+    
+    def progress_percentage(self):
+        """Рассчитывает процент завершения курса"""
+        total_lessons = self.course.lessons.count()
+        if total_lessons == 0:
+            return 0
+        
+        # Пока считаем что пользователь прошел все уроки если курс завершен
+        # Позже добавим отдельную модель для отслеживания пройденных уроков
+        if self.completed:
+            return 100
+        
+        # Временная логика - считаем прогресс на основе времени записи
+        # Это можно будет заменить на реальное отслеживание прогресса
+        days_since_enrollment = (timezone.now() - self.enrolled_at).days
+        base_progress = min(days_since_enrollment * 5, 80)  # Макс 80% без завершения
+        return base_progress
+    
+    def completed_lessons_count(self):
+        """Количество завершенных уроков (временная реализация)"""
+        total_lessons = self.course.lessons.count()
+        if self.completed:
+            return total_lessons
+        return max(1, int(total_lessons * (self.progress_percentage() / 100)))
+    
+    def total_lessons_count(self):
+        """Общее количество уроков в курсе"""
+        return self.course.lessons.count()

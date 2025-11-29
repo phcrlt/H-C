@@ -35,6 +35,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'accounts.middleware.EnsureGroupsMiddleware',  # Раскомментировать если нужно
 ]
 
 ROOT_URLCONF = 'education_platform_new.urls'

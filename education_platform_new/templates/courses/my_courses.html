@@ -1,0 +1,91 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-4">
+    <!-- Сообщения -->
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert alert-{{ message.tags }} alert-dismissible fade show">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        {% endfor %}
+    {% endif %}
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1>Мои курсы</h1>
+        <a href="{% url 'courses_list' %}" class="btn btn-primary">
+            Найти новые курсы
+        </a>
+    </div>
+
+    <!-- Отладочная информация -->
+    <div class="alert alert-info">
+        <strong>Отладка:</strong> 
+        Всего курсов: {{ total_courses }}, 
+        Активных: {{ active_courses|length }}, 
+        Завершенных: {{ completed_courses|length }}
+    </div>
+
+    <!-- Активные курсы -->
+    {% if active_courses %}
+    <div class="card mb-4">
+        <div class="card-header">
+            <h3>Активные курсы ({{ active_courses|length }})</h3>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                {% for enrollment in active_courses %}
+                <div class="col-md-6 mb-3">
+                    <div class="card">
+                        <div class="card-body">
+                            <h5>{{ enrollment.course.title }}</h5>
+                            <p class="text-muted">{{ enrollment.course.short_description }}</p>
+                            
+                            <div class="mb-2">
+                                <span class="badge bg-primary">{{ enrollment.course.get_level_display }}</span>
+                                {% if enrollment.course.is_free %}
+                                <span class="badge bg-success">Бесплатный</span>
+                                {% else %}
+                                <span class="badge bg-warning">Премиум</span>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="mb-2">
+                                <small class="text-muted">
+                                    Записан: {{ enrollment.enrolled_at|date:"d.m.Y" }}
+                                </small>
+                            </div>
+                            
+                            <div class="d-flex gap-2">
+                                <a href="{% url 'course_detail' enrollment.course.id %}" class="btn btn-sm btn-outline-primary">
+                                    Подробнее
+                                </a>
+                                <a href="{% url 'lessons_list' %}?course={{ enrollment.course.id }}" class="btn btn-sm btn-success">
+                                    Учиться ✅
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Если нет курсов -->
+    {% if not active_courses and not completed_courses %}
+    <div class="card">
+        <div class="card-body text-center py-5">
+            <i class="fas fa-book fa-4x text-muted mb-3"></i>
+            <h3 class="text-muted">У вас пока нет курсов</h3>
+            <p class="text-muted mb-4">Найдите интересные курсы и начните обучение</p>
+            <a href="{% url 'courses_list' %}" class="btn btn-primary btn-lg">
+                Найти курсы
+            </a>
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

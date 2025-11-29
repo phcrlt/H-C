@@ -2,6 +2,7 @@ from django.db import models
 from django.contrib.auth.models import User
 from django.db.models.signals import post_save
 from django.dispatch import receiver
+from django.contrib.auth.models import Group
 
 class UserProfile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
@@ -27,3 +28,27 @@ def create_user_profile(sender, instance, created, **kwargs):
 def save_user_profile(sender, instance, **kwargs):
     UserProfile.objects.get_or_create(user=instance)
     instance.userprofile.save()
+    
+@receiver(post_save, sender=User)
+def handle_user_save(sender, instance, created, **kwargs):
+    """
+    Обрабатывает создание и сохранение пользователя
+    """
+    if created:
+        # Создаем профиль для нового пользователя
+        UserProfile.objects.get_or_create(user=instance)
+        
+        # Автоматически добавляем в группу Students (если не админ)
+        if not instance.is_superuser:
+            try:
+                students_group = Group.objects.get(name='Students')
+                instance.groups.add(students_group)
+            except Group.DoesNotExist:
+                # Если группы нет - пропускаем, она будет создана через админку
+                pass
+    else:
+        # При обновлении пользователя сохраняем профиль
+        try:
+            instance.userprofile.save()
+        except UserProfile.DoesNotExist:
+            UserProfile.objects.create(user=instance)
