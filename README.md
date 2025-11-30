@@ -7,7 +7,7 @@
 5. Яковлев Владимир (Database Developer)
 
 # Ссылка на гугл-диск с видеообзором рабочего веб-приложения
-https://drive.google.com/file/d/1IGZ9XPoKyjwrBGlp7GylHoLW3j4IatW4/view?usp=drive_link
+https://drive.google.com/drive/folders/1UFkmbbttsNF9uEGtk3bjJ1d8w85MOmbV?usp=sharing
 
 ## 📋 Оглавление
 1. [Описание проекта](#описание-проекта)
